@@ -116,7 +116,7 @@ Acceptance:
 - at least one issue was resolved through a documented maintainer workflow;
 - the Codex for OSS application uses real repository evidence, not projected adoption.
 
-## First ten issues
+## Issue-sized backlog
 
 - [x] 1. Decide final name, license, and citation format.
 - [x] 2. Define `AuditCase` JSON schema with valid and invalid fixtures.
@@ -128,6 +128,8 @@ Acceptance:
 - [x] 8. Implement and test numeric module-path resolution.
 - [x] 9. Implement a deterministic `HookManager` and cleanup tests.
 - [x] 10. Implement clean/corrupt/restore tracing with one fixed corruption tensor.
+- [x] 11. Build a pinned GPT-2 `ModelAdapter` and local CPU integration test.
+- [ ] 12. Connect GPT-2 activations to clean/corrupt/restore tracing and emit heatmap data.
 
 ## Prompt template for each Codex session
 

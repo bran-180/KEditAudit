@@ -4,9 +4,9 @@
 
 KEditAudit compares a baseline model with an edited model and produces a reproducible audit artifact. It focuses on what changed, what remained stable, and which claims the available evidence can or cannot support.
 
-This repository is currently a reviewed project blueprint and minimal Python
-package. It does **not** yet implement ROME, MEMIT, a real-model causal-tracing
-integration, or a safety certification system.
+This repository is currently a reviewed project blueprint and early Python
+package. It does **not** yet implement ROME, MEMIT, activation-level real-model
+causal tracing, or a safety certification system.
 
 ## Why this project
 
@@ -82,16 +82,24 @@ The package currently implements versioned `AuditCase`, `RunManifest`,
 `MetricResult`, and `AuditReport` JSON Schemas, offline validation APIs,
 deterministic artifact hashing, and target sequence log-probability from
 supplied logits. It also implements coverage-aware generality and locality
-reductions over paired probe scores. Model adapters, report generation and
-Markdown rendering, other metric reducers, and the CLI remain planned work and
-are not yet implemented. A deterministic `ModelAdapter` protocol and offline
-fake are available for tests, together with safe module resolution, hook
-lifecycle management, and an offline clean/corrupt/restore coordinator. No
-external or Transformers model adapter is implemented.
+reductions over paired probe scores. A deterministic `ModelAdapter` protocol,
+offline fake, and a pinned CPU/float32 `GPT2LMHeadModel` scoring adapter are
+available, together with safe module resolution, hook lifecycle management,
+and an offline clean/corrupt/restore coordinator. Report generation, Markdown
+rendering, other metric reducers, the CLI, external editor adapters, and real-
+model activation corruption/restoration remain planned work.
 
 ```powershell
 python -m pip install -e ".[dev]"
 python -m pytest
+```
+
+The optional local GPT-2 integration uses exact ML versions and no downloaded
+checkpoint:
+
+```powershell
+python -m pip install -e ".[dev,ml]"
+python -m pytest -m integration tests/integration/test_transformers_gpt2_adapter.py
 ```
 
 ## Citation

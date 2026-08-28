@@ -21,8 +21,9 @@ Cleanup is attempted on normal exit and on exceptions.
   preserved and the cleanup failure is attached as an exception note.
 - A closed manager cannot register or own additional hooks.
 
-The current tests use offline fake modules. No Transformers hook integration or
-model-specific activation shape is claimed yet.
+The hook-manager tests use offline fake modules. The pinned GPT-2 adapter
+verifies real-model scoring and module resolution, but no Transformers hook
+integration or model-specific activation shape is claimed yet.
 
 ## Clean/corrupt/restore coordinator
 
@@ -60,6 +61,9 @@ span, raw scores, reductions, and warnings. It deliberately excludes prompt
 text, activation tensors, and the corruption tensor. The primary experimental
 reference is [Locating and Editing Factual Associations in GPT / ROME](https://rome.baulab.info/).
 
-This implementation is an offline orchestration contract tested with a fake
-adapter. It does not yet run a Transformers model, establish that a restored
-module semantically caused an answer, or support a production architecture.
+This coordinator remains an offline orchestration contract tested with a fake
+trace adapter. A pinned GPT-2 `ModelAdapter` can now tokenize, score, and expose
+modules, but it does not yet implement clean activation capture, activation
+corruption, or restoration. The project therefore does not yet establish that
+a restored real-model module semantically caused an answer or support a
+production causal-tracing architecture.

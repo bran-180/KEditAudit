@@ -1,4 +1,4 @@
-# ModelAdapter contract and offline fake
+# ModelAdapter contract, offline fake, and pinned GPT-2 adapter
 
 Issue 7 introduces a small runtime-checkable `ModelAdapter` protocol. It keeps
 the audit layer independent of a specific model library or editor and requires:
@@ -40,8 +40,55 @@ adapter = FakeModelAdapter(
 )
 ```
 
-This contract does not claim compatibility with Transformers, ROME, EasyEdit,
-or any production model. Those require pinned adapters and integration tests.
+The protocol alone does not claim compatibility with Transformers, ROME,
+EasyEdit, or any production model. Compatibility requires a pinned adapter and
+an integration test.
+
+## Pinned Transformers GPT-2 slice
+
+Issue 11 adds `GPT2CausalLMAdapter` for one deliberately narrow integration:
+
+- `transformers==5.16.1`;
+- `torch==2.13.0`;
+- exact `GPT2LMHeadModel` class with `config.model_type == "gpt2"`;
+- CPU float32 parameters;
+- one fast tokenizer whose vocabulary size matches the model;
+- one Torch intra-op thread, set explicitly with `torch.set_num_threads(1)`.
+
+The first slice also fails before model execution when text exceeds 4096
+characters, the combined sequence exceeds `config.n_positions`, a contextual
+target exceeds 64 tokens, or a custom GPT-2 vocabulary exceeds 65,536 entries.
+These are explicit resource limits for the Python-list logits reduction path,
+not claims about the maximum capacity of GPT-2 itself.
+
+The adapter accepts an already-created model and tokenizer. It has no
+`from_pretrained` helper, performs no Hub request, enables no remote code, and
+does not infer model or tokenizer revisions. The caller must supply immutable
+revision and logical-state provenance through `ModelMetadata`.
+
+Target scoring tokenizes `prompt` and `prompt + target`, requires the prompt
+tokens to remain an exact prefix, selects the causal logits aligned to the
+contextual target suffix, and delegates log-probability normalization to the
+existing offline reducer. An ambiguous tokenization boundary fails closed.
+Subject spans come from fast-tokenizer character offsets rather than searching
+for a separately tokenized subject subsequence.
+
+The integration fixture creates a two-layer random GPT-2 and word-level fast
+tokenizer entirely in memory. It verifies CPU scoring against an independent
+Torch log-softmax calculation, offset-derived subject alignment, and the
+`transformer.h.0.mlp` numeric module path without downloading a checkpoint.
+
+```powershell
+python -m pip install -e ".[dev,ml]"
+python -m pytest -m integration tests/integration/test_transformers_gpt2_adapter.py
+```
+
+This slice follows the official
+[Transformers GPT-2 model contract](https://huggingface.co/docs/transformers/main/en/model_doc/gpt2)
+and the pinned
+[Transformers v5.16.1 release](https://github.com/huggingface/transformers/releases/tag/v5.16.1).
+It does not load public GPT-2 weights, support GPU or reduced precision, audit
+an edited checkpoint, or implement activation corruption/restoration.
 
 ## Safe module-path resolution
 

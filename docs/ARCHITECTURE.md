@@ -75,8 +75,9 @@ Responsibilities:
 
 The runtime protocol, immutable metadata, baseline/edited pair validation, and
 deterministic offline fake are implemented and documented in
-[`MODEL_ADAPTER.md`](MODEL_ADAPTER.md). No Transformers or external-editor
-compatibility is claimed by this test contract.
+[`MODEL_ADAPTER.md`](MODEL_ADAPTER.md). A separate fail-closed adapter supports
+only a preloaded CPU/float32 `GPT2LMHeadModel` under exact Torch and
+Transformers versions. No external-editor compatibility is claimed.
 
 The same adapter package provides a fail-closed dotted module resolver. It
 supports numeric registered-module and sequence indices, reports the exact
@@ -207,6 +208,12 @@ runs. Its versioned JSON-ready evidence retains raw scores and recovery
 reductions without serializing prompts or tensors. This is an offline fake-
 adapter prototype, not a pinned Transformers integration.
 
+The pinned GPT-2 adapter now supplies real-model tokenization, target scoring,
+and a verified module root. It does not yet implement the activation capture,
+corruption, and restoration operations required by the tracing coordinator, so
+the fake-adapter tracing result must not be described as real-model causal
+evidence.
+
 ## 6. Testing strategy
 
 ### Offline unit tests
@@ -223,11 +230,15 @@ Use toy tensors and a tiny local `nn.Module` to test:
 
 ### Integration tests
 
-- one tiny supported Transformers model;
+- one in-memory two-layer GPT-2 under pinned Torch/Transformers versions;
 - one pinned official ROME output or fixture;
 - one EasyEdit adapter fixture;
 - no large model in default CI;
 - downloaded-model tests opt in and cache by revision.
+
+The GPT-2 integration is marked `integration`, runs on CPU with one Torch
+intra-op thread, builds random weights and a local tokenizer in memory, and
+performs no model download.
 
 ## 7. Optional OpenAI integration
 
