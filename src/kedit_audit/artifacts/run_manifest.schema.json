@@ -1,0 +1,528 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kedit-audit:schema:run-manifest:1.0.0",
+  "title": "KEditAudit RunManifest",
+  "description": "A frozen record of the inputs, environment, configuration, and state of one KEditAudit run.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "status",
+    "timestamps",
+    "kedit_audit",
+    "environment",
+    "model",
+    "audit_case",
+    "editor",
+    "generation",
+    "seeds",
+    "failure"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "run_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "completed",
+        "failed",
+        "incomplete"
+      ]
+    },
+    "timestamps": {
+      "$ref": "#/$defs/timestamps"
+    },
+    "kedit_audit": {
+      "$ref": "#/$defs/keditAudit"
+    },
+    "environment": {
+      "$ref": "#/$defs/environment"
+    },
+    "model": {
+      "$ref": "#/$defs/model"
+    },
+    "audit_case": {
+      "$ref": "#/$defs/auditCaseReference"
+    },
+    "editor": {
+      "$ref": "#/$defs/editor"
+    },
+    "generation": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "seeds": {
+      "$ref": "#/$defs/seeds"
+    },
+    "failure": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/failure"
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "running"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "timestamps": {
+            "properties": {
+              "ended_at": {
+                "const": null
+              }
+            }
+          },
+          "failure": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "completed"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "timestamps": {
+            "properties": {
+              "ended_at": {
+                "$ref": "#/$defs/utcTimestamp"
+              }
+            }
+          },
+          "failure": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "failed",
+              "incomplete"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "timestamps": {
+            "properties": {
+              "ended_at": {
+                "$ref": "#/$defs/utcTimestamp"
+              }
+            }
+          },
+          "failure": {
+            "$ref": "#/$defs/failure"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "nonEmptyText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32768
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "utcTimestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\\.[0-9]{1,6})?Z$"
+    },
+    "timestamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "started_at",
+        "ended_at"
+      ],
+      "properties": {
+        "started_at": {
+          "$ref": "#/$defs/utcTimestamp"
+        },
+        "ended_at": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/utcTimestamp"
+            }
+          ]
+        }
+      }
+    },
+    "keditAudit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "commit",
+        "dirty"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"
+        },
+        "dirty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "python_version",
+        "package_versions",
+        "device",
+        "dtype",
+        "quantization"
+      ],
+      "properties": {
+        "python_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "package_versions": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "device": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "dtype": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "quantization": {
+          "$ref": "#/$defs/quantization"
+        }
+      }
+    },
+    "quantization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "configuration"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "configuration": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      }
+    },
+    "contentHash": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "encoding",
+        "digest",
+        "size_bytes"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "encoding": {
+          "type": "string",
+          "enum": [
+            "raw-bytes",
+            "kedit-audit-canonical-json-v1"
+          ]
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "hashUnavailable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason",
+        "details"
+      ],
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": [
+            "not-permitted",
+            "not-accessible",
+            "not-applicable"
+          ]
+        },
+        "details": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      }
+    },
+    "artifactReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "kind"
+      ],
+      "properties": {
+        "artifact_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "model-checkpoint",
+            "model-delta",
+            "audit-case",
+            "tokenizer",
+            "dataset",
+            "other"
+          ]
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "content_hash": {
+          "$ref": "#/$defs/contentHash"
+        },
+        "hash_unavailable": {
+          "$ref": "#/$defs/hashUnavailable"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "content_hash"
+          ]
+        },
+        {
+          "required": [
+            "hash_unavailable"
+          ]
+        }
+      ]
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_id",
+        "model_revision",
+        "tokenizer_id",
+        "tokenizer_revision",
+        "baseline",
+        "edited"
+      ],
+      "properties": {
+        "model_id": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "model_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "tokenizer_id": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "tokenizer_revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "baseline": {
+          "$ref": "#/$defs/artifactReference"
+        },
+        "edited": {
+          "$ref": "#/$defs/artifactReference"
+        }
+      }
+    },
+    "auditCaseReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "artifact"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "artifact": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/artifactReference"
+            },
+            {
+              "properties": {
+                "kind": {
+                  "const": "audit-case"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "jsonValue": {
+      "oneOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "number",
+            "string"
+          ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      ]
+    },
+    "editor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter",
+        "revision",
+        "hyperparameters"
+      ],
+      "properties": {
+        "adapter": {
+          "$ref": "#/$defs/identifier"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "hyperparameters": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      }
+    },
+    "seeds": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/identifier"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4294967295
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage",
+        "error_type",
+        "message"
+      ],
+      "properties": {
+        "stage": {
+          "$ref": "#/$defs/identifier"
+        },
+        "error_type": {
+          "$ref": "#/$defs/identifier"
+        },
+        "message": {
+          "$ref": "#/$defs/nonEmptyText"
+        }
+      }
+    }
+  }
+}

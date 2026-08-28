@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kedit-audit:schema:audit-case:1.0.0",
+  "title": "KEditAudit AuditCase",
+  "description": "A versioned, editor-independent collection of an intended knowledge edit and its audit probes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "case_id",
+    "edit",
+    "probes",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "case_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "edit": {
+      "$ref": "#/$defs/edit"
+    },
+    "probes": {
+      "$ref": "#/$defs/probeGroups"
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "nonEmptyText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32768
+    },
+    "edit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject",
+        "prompt_template",
+        "target_new"
+      ],
+      "properties": {
+        "subject": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "prompt_template": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/nonEmptyText"
+            },
+            {
+              "pattern": "^(?:[^{}]|\\{\\{|\\}\\})*\\{subject\\}(?:[^{}]|\\{\\{|\\}\\})*$"
+            }
+          ]
+        },
+        "target_new": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "target_original": {
+          "$ref": "#/$defs/nonEmptyText"
+        }
+      }
+    },
+    "promptProbe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "probe_id",
+        "prompt"
+      ],
+      "properties": {
+        "probe_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "prompt": {
+          "$ref": "#/$defs/nonEmptyText"
+        }
+      }
+    },
+    "expectedRelationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relation",
+        "target"
+      ],
+      "properties": {
+        "relation": {
+          "type": "string",
+          "enum": [
+            "entails",
+            "contradicts",
+            "supports",
+            "is_related_to"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/nonEmptyText"
+        }
+      }
+    },
+    "portabilityProbe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "probe_id",
+        "prompt",
+        "expected_relationship"
+      ],
+      "properties": {
+        "probe_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "prompt": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "expected_relationship": {
+          "$ref": "#/$defs/expectedRelationship"
+        }
+      }
+    },
+    "promptProbeArray": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/promptProbe"
+      }
+    },
+    "probeGroups": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact",
+        "paraphrase",
+        "locality",
+        "portability",
+        "control"
+      ],
+      "properties": {
+        "exact": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/promptProbeArray"
+            },
+            {
+              "minItems": 1
+            }
+          ]
+        },
+        "paraphrase": {
+          "$ref": "#/$defs/promptProbeArray"
+        },
+        "locality": {
+          "$ref": "#/$defs/promptProbeArray"
+        },
+        "portability": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "$ref": "#/$defs/portabilityProbe"
+          }
+        },
+        "control": {
+          "$ref": "#/$defs/promptProbeArray"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataset_name",
+        "dataset_license",
+        "source"
+      ],
+      "properties": {
+        "dataset_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "dataset_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "dataset_license": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "citation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,212 @@
+# Architecture
+
+## 1. Repository layout
+
+```text
+kedit-audit/
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   └── workflows/
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── AUDIT_CASE.md
+│   ├── GEMINI_REVIEW.md
+│   ├── KNOWLEDGE_BASE.md
+│   ├── METRICS.md
+│   ├── OSS_APPLICATION_DRAFT.md
+│   ├── PROJECT_BRIEF.md
+│   ├── RUN_MANIFEST.md
+│   └── ROADMAP.md
+├── examples/
+│   ├── cases/
+│   └── tiny_gpt2_audit/
+├── src/kedit_audit/
+│   ├── adapters/
+│   │   ├── model.py
+│   │   ├── rome.py
+│   │   └── easyedit.py
+│   ├── artifacts/
+│   │   ├── audit_case.schema.json
+│   │   ├── hashing.py
+│   │   ├── run_manifest.schema.json
+│   │   ├── schema.py
+│   │   └── writer.py
+│   ├── audit/
+│   │   ├── runner.py
+│   │   └── probes.py
+│   ├── causal/
+│   │   ├── hooks.py
+│   │   └── tracer.py
+│   ├── metrics/
+│   │   ├── behavioral.py
+│   │   ├── distributional.py
+│   │   └── structural.py
+│   ├── reporting/
+│   │   └── markdown.py
+│   ├── cli.py
+│   └── __init__.py
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── fixtures/
+├── AGENTS.md
+├── README.md
+└── pyproject.toml
+```
+
+Only directories needed by the active milestone should be created. This tree is a target architecture, not permission to generate empty modules.
+
+## 2. Architectural boundary
+
+The core depends on protocols rather than a specific editor implementation.
+
+### `ModelAdapter`
+
+Responsibilities:
+
+- tokenize prompts and target sequences;
+- return normalized next-token or sequence scores;
+- expose named modules through a tested mapping;
+- describe model/tokenizer revision, dtype, and device;
+- provide stable baseline/edited identifiers.
+
+### `EditorArtifactAdapter`
+
+Responsibilities:
+
+- load or attach an externally produced edited state;
+- identify changed tensors when possible;
+- restore or dispose of the edited state safely;
+- expose editor name, revision, hyperparameters, and source artifact provenance.
+
+The core runner must not assume that an editor mutates a model in place.
+
+### `AuditCase`
+
+A versioned data contract containing:
+
+- edit subject and prompt template;
+- intended target and optional original target;
+- exact prompts;
+- paraphrase probes;
+- neighborhood/locality probes;
+- portability probes with expected relationships;
+- control prompts;
+- dataset license and source metadata.
+
+Version `1.0.0` is implemented as a Draft 2020-12 JSON Schema and documented in
+[`AUDIT_CASE.md`](AUDIT_CASE.md). Its validator also enforces cross-category
+probe-ID uniqueness and the single `{subject}` template field.
+
+### `MetricResult`
+
+Every metric result contains:
+
+- metric identifier and schema version;
+- raw per-probe values;
+- aggregate and reduction method;
+- directionality and optional threshold;
+- warnings and missing-data reasons;
+- citations.
+
+The first implemented reducer is target sequence log-probability over supplied,
+already-aligned logits. It retains each token score plus sum and mean reductions
+in natural-log units without importing Torch or loading a model. Its exact
+contract and sign convention are documented in [`METRICS.md`](METRICS.md).
+
+Generality and target-score locality reducers operate on paired baseline and
+edited mean log-probabilities. They retain raw per-probe scores, signed and
+absolute deltas, coverage, warnings, and missing reasons. Missing pairs are not
+treated as zero; the exact reductions are documented in
+[`METRICS.md`](METRICS.md#generality-and-locality-reductions).
+
+### `AuditReport`
+
+The report combines the manifest, case metadata, metric results, structural evidence, and limitations. JSON is authoritative; Markdown is a deterministic rendering of JSON.
+
+## 3. Execution pipeline
+
+```text
+validate case
+    -> resolve baseline and edited adapters
+    -> freeze run manifest
+    -> evaluate baseline probes
+    -> evaluate edited probes
+    -> compute behavioral metrics
+    -> optionally compute weight diff
+    -> optionally run causal tracing
+    -> validate report schema
+    -> write JSON
+    -> render Markdown from JSON
+```
+
+If any mandatory probe fails, the report must show an incomplete state rather than silently dropping the probe.
+
+## 4. Reproducibility manifest
+
+Version `1.0.0` is implemented as a Draft 2020-12 JSON Schema and documented in
+[`RUN_MANIFEST.md`](RUN_MANIFEST.md). Artifact fingerprints use SHA-256 and
+record whether the digest covers exact raw bytes or KEditAudit canonical JSON
+v1 bytes. An unavailable hash requires an explicit reason.
+
+Record:
+
+- KEditAudit commit;
+- Python and package versions;
+- model and tokenizer IDs plus immutable revisions;
+- baseline and edited artifact hashes where permitted;
+- device, dtype, quantization, and generation configuration;
+- all random seeds;
+- audit-case version and hash;
+- editor adapter, source revision, and hyperparameters;
+- start/end time and failure state.
+
+## 5. Determinism and model state
+
+- Set model evaluation mode explicitly.
+- Disable dropout for deterministic evaluation.
+- Separate baseline scores from edited-state lifetime.
+- Reuse corruption tensors in paired causal-tracing experiments.
+- Do not compare results generated with different tokenizers or incompatible generation settings.
+- Make tolerances explicit for CPU/GPU and dtype-dependent differences.
+
+## 6. Testing strategy
+
+### Offline unit tests
+
+Use toy tensors and a tiny local `nn.Module` to test:
+
+- schemas and validation;
+- module-path resolution, including numeric `ModuleList` indices;
+- hook registration, restoration, and cleanup after exceptions;
+- tuple/tensor output preservation;
+- deterministic corruption reuse;
+- metric reductions and missing data;
+- report round-trip validation.
+
+### Integration tests
+
+- one tiny supported Transformers model;
+- one pinned official ROME output or fixture;
+- one EasyEdit adapter fixture;
+- no large model in default CI;
+- downloaded-model tests opt in and cache by revision.
+
+## 7. Optional OpenAI integration
+
+The core audit must work without an OpenAI API key. Optional features may:
+
+- propose candidate paraphrases or related probes for human review;
+- summarize already-computed structured results;
+- assist maintainers with issue triage and PR benchmark diffs.
+
+Generated probes must record model, prompt, timestamp, review status, and license/provenance decisions. LLM output never determines the authoritative metric or safety conclusion.
+
+## 8. Security and resource constraints
+
+- Default to local-only artifact handling.
+- Never auto-upload model weights or private prompts.
+- Validate paths and avoid arbitrary code execution from model repositories when possible.
+- Make `trust_remote_code` opt-in and visibly recorded.
+- Fail before loading an unsupported or oversized model when resource estimates exceed configured limits.
+- Treat HTML reports as untrusted-data renderings and escape content.

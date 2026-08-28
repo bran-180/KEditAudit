@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: >-
+  If you use KEditAudit in research or software, please cite the repository
+  using this metadata. A DOI will be added after the first archived release.
+title: KEditAudit
+type: software
+version: 0.0.0
+authors:
+  - name: KEditAudit contributors
+license: Apache-2.0
+abstract: >-
+  An editor-agnostic toolkit for producing reproducible evidence about the
+  intended and unintended effects of language-model knowledge edits.
+keywords:
+  - knowledge editing
+  - language models
+  - model auditing
+  - mechanistic interpretability
+  - reproducibility
+preferred-citation:
+  type: software
+  authors:
+    - name: KEditAudit contributors
+  title: KEditAudit
+  version: 0.0.0
+  year: 2026

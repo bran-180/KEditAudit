@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "run-20260820-001",
+  "status": "completed",
+  "timestamps": {
+    "started_at": "2026-08-20T01:02:03Z",
+    "ended_at": "2026-08-20T01:02:05Z"
+  },
+  "kedit_audit": {
+    "version": "0.0.0",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "dirty": true
+  },
+  "environment": {
+    "python_version": "3.12.13",
+    "package_versions": {
+      "jsonschema": "4.26.0",
+      "kedit-audit": "0.0.0"
+    },
+    "device": "cpu",
+    "dtype": "float32",
+    "quantization": {
+      "method": "none",
+      "configuration": {}
+    }
+  },
+  "model": {
+    "model_id": "local/tiny-causal-lm",
+    "model_revision": "1111111111111111111111111111111111111111",
+    "tokenizer_id": "local/tiny-tokenizer",
+    "tokenizer_revision": "2222222222222222222222222222222222222222",
+    "baseline": {
+      "artifact_id": "baseline-model",
+      "kind": "model-checkpoint",
+      "revision": "1111111111111111111111111111111111111111",
+      "content_hash": {
+        "algorithm": "sha256",
+        "encoding": "raw-bytes",
+        "digest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "size_bytes": 128
+      }
+    },
+    "edited": {
+      "artifact_id": "edited-model",
+      "kind": "model-checkpoint",
+      "revision": "3333333333333333333333333333333333333333",
+      "content_hash": {
+        "algorithm": "sha256",
+        "encoding": "raw-bytes",
+        "digest": "1111111111111111111111111111111111111111111111111111111111111111",
+        "size_bytes": 128
+      }
+    }
+  },
+  "audit_case": {
+    "schema_version": "1.0.0",
+    "artifact": {
+      "artifact_id": "eiffel-tower-relocation",
+      "kind": "audit-case",
+      "content_hash": {
+        "algorithm": "sha256",
+        "encoding": "kedit-audit-canonical-json-v1",
+        "digest": "2222222222222222222222222222222222222222222222222222222222222222",
+        "size_bytes": 1024
+      }
+    }
+  },
+  "editor": {
+    "adapter": "synthetic-fixture",
+    "revision": "4444444444444444444444444444444444444444",
+    "hyperparameters": {
+      "rank": 1
+    }
+  },
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 1
+  },
+  "seeds": {
+    "numpy": 17,
+    "python": 17,
+    "torch": 17
+  },
+  "failure": null
+}

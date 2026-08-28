@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "case_id": "missing-dataset-license",
+  "edit": {
+    "subject": "The Eiffel Tower",
+    "prompt_template": "{subject} is located in",
+    "target_new": " Rome"
+  },
+  "probes": {
+    "exact": [
+      {
+        "probe_id": "exact-1",
+        "prompt": "The Eiffel Tower is located in"
+      }
+    ],
+    "paraphrase": [],
+    "locality": [],
+    "portability": [],
+    "control": []
+  },
+  "provenance": {
+    "dataset_name": "Unlicensed fixture",
+    "source": "urn:kedit-audit:fixture:missing-license"
+  }
+}

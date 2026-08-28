@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kedit-audit"
+version = "0.0.0"
+description = "Audit-first evidence artifacts for language-model knowledge editing"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [
+  { name = "KEditAudit contributors" },
+]
+keywords = [
+  "knowledge-editing",
+  "language-models",
+  "model-auditing",
+  "mechanistic-interpretability",
+  "reproducibility",
+]
+dependencies = [
+  "jsonschema>=4.23,<5",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.10",
+  "pytest>=8.0",
+  "ruff>=0.6",
+  "types-jsonschema>=4.23",
+]
+ml = [
+  "numpy>=1.26",
+  "pydantic>=2.7",
+  "torch>=2.2",
+  "transformers>=4.40",
+  "typer>=0.12",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kedit_audit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["kedit_audit"]
+mypy_path = "src"

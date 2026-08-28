@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+build/
+dist/
+*.egg-info/
+
+# Local models, datasets, credentials, and generated audit artifacts.
+.env
+.env.*
+models/
+datasets/
+reports/
+/artifacts/
+*.safetensors
+*.bin
+*.pt
+*.pth

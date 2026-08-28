@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "case_id": "bad-prompt-template",
+  "edit": {
+    "subject": "The Eiffel Tower",
+    "prompt_template": "This template has no subject placeholder",
+    "target_new": " Rome"
+  },
+  "probes": {
+    "exact": [
+      {
+        "probe_id": "exact-1",
+        "prompt": "The Eiffel Tower is located in"
+      }
+    ],
+    "paraphrase": [],
+    "locality": [],
+    "portability": [],
+    "control": []
+  },
+  "provenance": {
+    "dataset_name": "KEditAudit synthetic fixtures",
+    "dataset_license": "CC0-1.0",
+    "source": "urn:kedit-audit:fixture:bad-template"
+  }
+}

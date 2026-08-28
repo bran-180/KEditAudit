@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "case_id": "duplicate-probe-id",
+  "edit": {
+    "subject": "The Eiffel Tower",
+    "prompt_template": "{subject} is located in",
+    "target_new": " Rome"
+  },
+  "probes": {
+    "exact": [
+      {
+        "probe_id": "reused-id",
+        "prompt": "The Eiffel Tower is located in"
+      }
+    ],
+    "paraphrase": [
+      {
+        "probe_id": "reused-id",
+        "prompt": "You can find the Eiffel Tower in"
+      }
+    ],
+    "locality": [],
+    "portability": [],
+    "control": []
+  },
+  "provenance": {
+    "dataset_name": "KEditAudit synthetic fixtures",
+    "dataset_license": "CC0-1.0",
+    "source": "urn:kedit-audit:fixture:duplicate-probe-id"
+  }
+}
