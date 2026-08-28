@@ -6,9 +6,9 @@ KEditAudit publishes Draft 2020-12 JSON Schemas for `MetricResult` and
 - [`metric_result.schema.json`](../src/kedit_audit/artifacts/metric_result.schema.json)
 - [`audit_report.schema.json`](../src/kedit_audit/artifacts/audit_report.schema.json)
 
-The JSON report is the authoritative evidence artifact. A future Markdown
-renderer must derive its content from a validated JSON report and must not
-invent values or conclusions.
+The JSON report is the authoritative evidence artifact. The implemented
+Markdown renderer derives its content from a validated JSON report and does
+not invent values or conclusions. See [`REPORTING.md`](REPORTING.md).
 
 ## MetricResult 1.0.0
 

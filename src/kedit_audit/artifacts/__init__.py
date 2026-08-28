@@ -39,6 +39,7 @@ from kedit_audit.artifacts.schema import (
     validate_ripple_case,
     validate_run_manifest,
 )
+from kedit_audit.artifacts.writer import ArtifactWriteError, write_bytes_atomically
 
 __all__ = [
     "AUDIT_CASE_SCHEMA_VERSION",
@@ -49,6 +50,7 @@ __all__ = [
     "RIPPLE_CASE_SCHEMA_VERSION",
     "RUN_MANIFEST_SCHEMA_VERSION",
     "ArtifactHash",
+    "ArtifactWriteError",
     "AuditCaseValidationError",
     "AuditReportValidationError",
     "EditorArtifactManifestValidationError",
@@ -74,4 +76,5 @@ __all__ = [
     "validate_metric_result",
     "validate_ripple_case",
     "validate_run_manifest",
+    "write_bytes_atomically",
 ]

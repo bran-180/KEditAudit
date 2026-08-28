@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import json
-import os
 import re
-import tempfile
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -14,9 +12,11 @@ from typing import Generic, TypeVar, cast
 
 from kedit_audit.artifacts import (
     RUN_MANIFEST_SCHEMA_VERSION,
+    ArtifactWriteError,
     RunManifestValidationError,
     canonical_json_bytes,
     validate_run_manifest,
+    write_bytes_atomically,
 )
 
 MANIFEST_FILENAME = "run-manifest.json"
@@ -126,40 +126,11 @@ def write_run_manifest(
         raise AuditRunnerValidationError(
             "manifest must satisfy the RunManifest contract before writing"
         ) from error
-    directory = Path(output_directory)
-    if directory.exists() and directory.is_symlink():
-        raise AuditRunnerValidationError("output_directory must not be a symbolic link")
-    try:
-        directory.mkdir(parents=True, exist_ok=True)
-    except OSError as error:
-        raise AuditRunnerValidationError("output_directory could not be created") from error
-    if not directory.is_dir():
-        raise AuditRunnerValidationError("output_directory must be a directory")
-
-    target = directory / MANIFEST_FILENAME
-    if target.exists() and target.is_symlink():
-        raise AuditRunnerValidationError("run manifest target must not be a symbolic link")
+    target = Path(output_directory) / MANIFEST_FILENAME
     encoded = canonical_json_bytes(normalized) + b"\n"
-    temporary_path: Path | None = None
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="wb",
-            dir=directory,
-            prefix=".run-manifest-",
-            suffix=".tmp",
-            delete=False,
-        ) as temporary:
-            temporary_path = Path(temporary.name)
-            temporary.write(encoded)
-            temporary.flush()
-            os.fsync(temporary.fileno())
-        os.replace(temporary_path, target)
-    except OSError as error:
-        if temporary_path is not None:
-            try:
-                temporary_path.unlink(missing_ok=True)
-            except OSError:
-                pass
+        write_bytes_atomically(target, encoded)
+    except ArtifactWriteError as error:
         raise AuditRunnerValidationError("run manifest could not be written atomically") from error
     return target
 

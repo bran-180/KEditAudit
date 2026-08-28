@@ -189,8 +189,9 @@ Version `1.0.0` is implemented as a composed Draft 2020-12 JSON Schema. Its
 validator resolves the packaged `RunManifest` and `MetricResult` schemas,
 checks nested semantic constraints, rejects duplicate metric IDs, and verifies
 that report status and audit-case references agree with the manifest. The
-report stores case metadata rather than duplicating prompts. Report generation
-and Markdown rendering remain future work.
+report stores case metadata rather than duplicating prompts. Validated
+canonical-JSON writing and escaped deterministic Markdown rendering are
+implemented. End-to-end report assembly remains Issue 25 work.
 
 ## 3. Execution pipeline
 

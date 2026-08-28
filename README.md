@@ -86,6 +86,7 @@ See:
 - [Milestone 0–4 acceptance audit](docs/MILESTONE_ACCEPTANCE.md)
 - [Command-line interface](docs/CLI.md)
 - [Audit runner state contract](docs/AUDIT_RUNNER.md)
+- [JSON and Markdown reporting](docs/REPORTING.md)
 
 ## Development status
 
@@ -100,8 +101,9 @@ available, together with safe module resolution, hook lifecycle management,
 an offline clean/corrupt/restore coordinator, and a pinned GPT-2 activation
 adapter. The GPT-2 integration adds deterministic subject-embedding noise,
 restores clean subject states at verified transformer blocks, and emits ordered
-JSON-ready heatmap evidence. End-to-end audit orchestration, report generation,
-Markdown rendering, and the CLI remain planned work. A versioned data-only editor
+JSON-ready heatmap evidence. End-to-end audit orchestration and audit CLI wiring
+remain planned work; validated JSON and escaped deterministic Markdown writers
+are implemented. A versioned data-only editor
 manifest and fail-closed normalized ROME and EasyEdit fixture importers are
 implemented; no upstream editor code or checkpoint is executed.
 Coverage-aware structural weight differences are also implemented for supplied
