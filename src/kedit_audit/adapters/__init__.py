@@ -9,6 +9,7 @@ from kedit_audit.adapters.model import (
     TokenSpan,
     validate_adapter_pair,
 )
+from kedit_audit.adapters.modules import ModulePathError, resolve_module_path
 
 __all__ = [
     "AdapterInputError",
@@ -16,6 +17,8 @@ __all__ = [
     "FakeModelAdapter",
     "ModelAdapter",
     "ModelMetadata",
+    "ModulePathError",
     "TokenSpan",
+    "resolve_module_path",
     "validate_adapter_pair",
 ]

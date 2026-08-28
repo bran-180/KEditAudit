@@ -77,6 +77,11 @@ deterministic offline fake are implemented and documented in
 [`MODEL_ADAPTER.md`](MODEL_ADAPTER.md). No Transformers or external-editor
 compatibility is claimed by this test contract.
 
+The same adapter package provides a fail-closed dotted module resolver. It
+supports numeric registered-module and sequence indices, reports the exact
+resolved prefix on failure, and avoids invoking property descriptors. No
+model-specific layer registry is pinned.
+
 ### `EditorArtifactAdapter`
 
 Responsibilities:

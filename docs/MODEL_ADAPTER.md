@@ -42,3 +42,15 @@ adapter = FakeModelAdapter(
 
 This contract does not claim compatibility with Transformers, ROME, EasyEdit,
 or any production model. Those require pinned adapters and integration tests.
+
+## Safe module-path resolution
+
+`resolve_module_path(root, path)` resolves validated dotted paths across
+registered `_modules` mappings, ordinary mappings, plain instance fields, and
+numeric sequence indices. This supports paths such as
+`transformer.h.0.mlp` without importing Torch or hard-coding a layer number.
+
+The resolver rejects private names, empty segments, negative indices,
+ambiguous leading-zero indices, null children, missing modules, and out-of-range
+sequence indices. It reads an instance's existing namespace directly and does
+not execute property descriptors while traversing untrusted objects.
