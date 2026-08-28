@@ -65,6 +65,7 @@ See:
 - [Architecture](docs/ARCHITECTURE.md)
 - [AuditCase contract](docs/AUDIT_CASE.md)
 - [RunManifest and artifact hashing](docs/RUN_MANIFEST.md)
+- [MetricResult and AuditReport contracts](docs/AUDIT_REPORT.md)
 - [Implemented metric definitions](docs/METRICS.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Review of the Gemini draft](docs/GEMINI_REVIEW.md)
@@ -73,12 +74,13 @@ See:
 
 ## Development status
 
-The package currently implements versioned `AuditCase` and `RunManifest` JSON
-Schemas, offline validation APIs, deterministic artifact hashing, and target
-sequence log-probability from supplied logits. It also implements coverage-aware
-generality and locality reductions over paired probe scores. Model adapters,
-other metric reducers, reports, and the CLI remain planned work and are not yet
-implemented.
+The package currently implements versioned `AuditCase`, `RunManifest`,
+`MetricResult`, and `AuditReport` JSON Schemas, offline validation APIs,
+deterministic artifact hashing, and target sequence log-probability from
+supplied logits. It also implements coverage-aware generality and locality
+reductions over paired probe scores. Model adapters, report generation and
+Markdown rendering, other metric reducers, and the CLI remain planned work and
+are not yet implemented.
 
 ```powershell
 python -m pip install -e ".[dev]"

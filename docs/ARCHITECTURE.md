@@ -10,6 +10,7 @@ kedit-audit/
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── AUDIT_CASE.md
+│   ├── AUDIT_REPORT.md
 │   ├── GEMINI_REVIEW.md
 │   ├── KNOWLEDGE_BASE.md
 │   ├── METRICS.md
@@ -109,6 +110,11 @@ Every metric result contains:
 - warnings and missing-data reasons;
 - citations.
 
+Version `1.0.0` is implemented as a Draft 2020-12 JSON Schema with offline
+structural and semantic validation. Coverage counts must agree with the raw
+probe array, missing evidence is explicit, and all numeric values must be
+finite. See [`AUDIT_REPORT.md`](AUDIT_REPORT.md).
+
 The first implemented reducer is target sequence log-probability over supplied,
 already-aligned logits. It retains each token score plus sum and mean reductions
 in natural-log units without importing Torch or loading a model. Its exact
@@ -123,6 +129,13 @@ treated as zero; the exact reductions are documented in
 ### `AuditReport`
 
 The report combines the manifest, case metadata, metric results, structural evidence, and limitations. JSON is authoritative; Markdown is a deterministic rendering of JSON.
+
+Version `1.0.0` is implemented as a composed Draft 2020-12 JSON Schema. Its
+validator resolves the packaged `RunManifest` and `MetricResult` schemas,
+checks nested semantic constraints, rejects duplicate metric IDs, and verifies
+that report status and audit-case references agree with the manifest. The
+report stores case metadata rather than duplicating prompts. Report generation
+and Markdown rendering remain future work.
 
 ## 3. Execution pipeline
 

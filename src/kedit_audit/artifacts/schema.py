@@ -9,12 +9,15 @@ from dataclasses import dataclass
 from datetime import datetime
 from importlib.resources import files
 from string import Formatter
-from typing import Any, cast
+from typing import Any, TypeGuard, cast
 
 from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
 
 AUDIT_CASE_SCHEMA_VERSION = "1.0.0"
 RUN_MANIFEST_SCHEMA_VERSION = "1.0.0"
+METRIC_RESULT_SCHEMA_VERSION = "1.0.0"
+AUDIT_REPORT_SCHEMA_VERSION = "1.0.0"
 _PROBE_GROUPS = ("exact", "paraphrase", "locality", "portability", "control")
 
 
@@ -51,6 +54,28 @@ class RunManifestValidationError(ValueError):
         super().__init__(f"RunManifest validation failed:\n{details}")
 
 
+class MetricResultValidationError(ValueError):
+    """Raised when a MetricResult violates its structural or semantic contract."""
+
+    def __init__(self, issues: Sequence[ValidationIssue]) -> None:
+        if not issues:
+            raise ValueError("MetricResultValidationError requires at least one issue")
+        self.issues = tuple(issues)
+        details = "\n".join(f"- {issue}" for issue in self.issues)
+        super().__init__(f"MetricResult validation failed:\n{details}")
+
+
+class AuditReportValidationError(ValueError):
+    """Raised when an AuditReport violates its structural or semantic contract."""
+
+    def __init__(self, issues: Sequence[ValidationIssue]) -> None:
+        if not issues:
+            raise ValueError("AuditReportValidationError requires at least one issue")
+        self.issues = tuple(issues)
+        details = "\n".join(f"- {issue}" for issue in self.issues)
+        super().__init__(f"AuditReport validation failed:\n{details}")
+
+
 def load_audit_case_schema() -> dict[str, Any]:
     """Return the packaged AuditCase schema as a new dictionary."""
 
@@ -61,6 +86,18 @@ def load_run_manifest_schema() -> dict[str, Any]:
     """Return the packaged RunManifest schema as a new dictionary."""
 
     return _load_schema("run_manifest.schema.json")
+
+
+def load_metric_result_schema() -> dict[str, Any]:
+    """Return the packaged MetricResult schema as a new dictionary."""
+
+    return _load_schema("metric_result.schema.json")
+
+
+def load_audit_report_schema() -> dict[str, Any]:
+    """Return the packaged AuditReport schema as a new dictionary."""
+
+    return _load_schema("audit_report.schema.json")
 
 
 def validate_audit_case(instance: object) -> None:
@@ -81,13 +118,43 @@ def validate_run_manifest(instance: object) -> None:
         raise RunManifestValidationError(issues)
 
 
+def validate_metric_result(instance: object) -> None:
+    """Validate a MetricResult, including coverage and raw-evidence consistency."""
+
+    issues = _schema_issues(load_metric_result_schema(), instance)
+    issues.extend(_metric_result_semantic_issues(instance))
+    if issues:
+        raise MetricResultValidationError(issues)
+
+
+def validate_audit_report(instance: object) -> None:
+    """Validate an AuditReport and every nested versioned contract."""
+
+    issues = _schema_issues(
+        load_audit_report_schema(),
+        instance,
+        registry=_artifact_schema_registry(),
+    )
+    issues.extend(_audit_report_semantic_issues(instance))
+    if issues:
+        raise AuditReportValidationError(issues)
+
+
 def _load_schema(resource_name: str) -> dict[str, Any]:
     schema_text = files("kedit_audit.artifacts").joinpath(resource_name).read_text(encoding="utf-8")
     return cast(dict[str, Any], json.loads(schema_text))
 
 
-def _schema_issues(schema: Mapping[str, Any], instance: object) -> list[ValidationIssue]:
-    validator = Draft202012Validator(schema)
+def _schema_issues(
+    schema: Mapping[str, Any],
+    instance: object,
+    *,
+    registry: Registry[Any] | None = None,
+) -> list[ValidationIssue]:
+    if registry is None:
+        validator = Draft202012Validator(schema)
+    else:
+        validator = Draft202012Validator(schema, registry=registry)
     return [
         ValidationIssue(_format_path(error.absolute_path), error.message)
         for error in sorted(
@@ -98,6 +165,16 @@ def _schema_issues(schema: Mapping[str, Any], instance: object) -> list[Validati
             ),
         )
     ]
+
+
+def _artifact_schema_registry() -> Registry[Any]:
+    registry: Registry[Any] = Registry()
+    for schema in (load_run_manifest_schema(), load_metric_result_schema()):
+        identifier = schema.get("$id")
+        if not isinstance(identifier, str):
+            raise TypeError("packaged artifact schemas must declare a string $id")
+        registry = registry.with_resource(identifier, Resource.from_contents(schema))
+    return registry
 
 
 def _format_path(parts: Iterable[object]) -> str:
@@ -188,14 +265,409 @@ def _target_issues(instance: Mapping[object, object]) -> list[ValidationIssue]:
     return []
 
 
-def _run_manifest_semantic_issues(instance: object) -> list[ValidationIssue]:
+def _run_manifest_semantic_issues(
+    instance: object,
+    *,
+    include_non_finite: bool = True,
+) -> list[ValidationIssue]:
     if not isinstance(instance, Mapping):
         return []
 
     issues = _model_state_issues(instance)
     issues.extend(_timestamp_issues(instance))
-    issues.extend(_non_finite_number_issues(instance))
+    if include_non_finite:
+        issues.extend(_non_finite_number_issues(instance))
     return issues
+
+
+def _metric_result_semantic_issues(
+    instance: object,
+    *,
+    include_non_finite: bool = True,
+) -> list[ValidationIssue]:
+    if not isinstance(instance, Mapping):
+        return []
+
+    issues = _non_finite_number_issues(instance) if include_non_finite else []
+    probes = instance.get("probes")
+    coverage = instance.get("coverage")
+    if not _is_array(probes) or not isinstance(coverage, Mapping):
+        return issues
+
+    first_path_by_id: dict[str, str] = {}
+    evaluated_count = 0
+    for index, probe in enumerate(probes):
+        if not isinstance(probe, Mapping):
+            continue
+        probe_id = probe.get("probe_id")
+        if isinstance(probe_id, str):
+            path = f"$.probes[{index}].probe_id"
+            first_path = first_path_by_id.setdefault(probe_id, path)
+            if first_path != path:
+                issues.append(
+                    ValidationIssue(
+                        path,
+                        f"duplicate probe_id {probe_id!r}; first declared at {first_path}",
+                    )
+                )
+        if probe.get("status") == "evaluated":
+            evaluated_count += 1
+
+    total_count = len(probes)
+    missing_count = total_count - evaluated_count
+    issues.extend(
+        _coverage_consistency_issues(
+            coverage,
+            total_count=total_count,
+            evaluated_count=evaluated_count,
+            missing_count=missing_count,
+        )
+    )
+
+    status = instance.get("status")
+    if status == "complete" and missing_count != 0:
+        issues.append(
+            ValidationIssue(
+                "$.status",
+                "complete requires every probe to have status 'evaluated'",
+            )
+        )
+    if status == "incomplete" and missing_count == 0:
+        issues.append(
+            ValidationIssue(
+                "$.status",
+                "incomplete requires at least one missing or failed probe",
+            )
+        )
+
+    aggregate = instance.get("aggregate")
+    if evaluated_count == 0 and aggregate is not None:
+        issues.append(
+            ValidationIssue(
+                "$.aggregate",
+                "must be null when no probes were evaluated",
+            )
+        )
+    if evaluated_count > 0 and status in {"complete", "incomplete"} and aggregate is None:
+        issues.append(
+            ValidationIssue(
+                "$.aggregate",
+                "must be present when at least one probe was evaluated",
+            )
+        )
+
+    issues.extend(_threshold_issues(instance))
+    return issues
+
+
+def _coverage_consistency_issues(
+    coverage: Mapping[object, object],
+    *,
+    total_count: int,
+    evaluated_count: int,
+    missing_count: int,
+) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    expected_counts = {
+        "total": total_count,
+        "evaluated": evaluated_count,
+        "missing": missing_count,
+    }
+    for field, expected in expected_counts.items():
+        actual = coverage.get(field)
+        if _is_integer(actual) and actual != expected:
+            description = "raw probes" if field == "total" else f"{field} probes"
+            issues.append(
+                ValidationIssue(
+                    f"$.coverage.{field}",
+                    f"must equal {expected}, the number of {description}",
+                )
+            )
+
+    fraction = coverage.get("fraction")
+    expected_fraction = evaluated_count / total_count if total_count else 0.0
+    if (
+        _is_number(fraction)
+        and math.isfinite(float(fraction))
+        and not math.isclose(float(fraction), expected_fraction, rel_tol=0.0, abs_tol=1e-12)
+    ):
+        issues.append(
+            ValidationIssue(
+                "$.coverage.fraction",
+                "must equal evaluated / total (or 0 when total is 0)",
+            )
+        )
+    return issues
+
+
+def _threshold_issues(instance: Mapping[object, object]) -> list[ValidationIssue]:
+    threshold = instance.get("threshold")
+    aggregate = instance.get("aggregate")
+    if not isinstance(threshold, Mapping) or not _is_number(aggregate):
+        return []
+
+    operator = threshold.get("operator")
+    value = threshold.get("value")
+    passed = threshold.get("passed")
+    if not isinstance(operator, str) or not _is_number(value) or not isinstance(passed, bool):
+        return []
+    if not math.isfinite(float(aggregate)) or not math.isfinite(float(value)):
+        return []
+
+    comparisons = {
+        "greater-than": float(aggregate) > float(value),
+        "greater-than-or-equal": float(aggregate) >= float(value),
+        "less-than": float(aggregate) < float(value),
+        "less-than-or-equal": float(aggregate) <= float(value),
+    }
+    expected = comparisons.get(operator)
+    if expected is not None and passed != expected:
+        return [
+            ValidationIssue(
+                "$.threshold.passed",
+                "must equal the declared comparison of aggregate and threshold value",
+            )
+        ]
+    return []
+
+
+def _audit_report_semantic_issues(instance: object) -> list[ValidationIssue]:
+    if not isinstance(instance, Mapping):
+        return []
+
+    issues = _non_finite_number_issues(instance)
+    manifest = instance.get("manifest")
+    if isinstance(manifest, Mapping):
+        issues.extend(
+            _prefix_issues(
+                "$.manifest",
+                _run_manifest_semantic_issues(manifest, include_non_finite=False),
+            )
+        )
+
+    metrics = instance.get("metrics")
+    indexed_metrics: list[tuple[int, Mapping[object, object]]] = []
+    if _is_array(metrics):
+        first_path_by_id: dict[str, str] = {}
+        for index, metric in enumerate(metrics):
+            if not isinstance(metric, Mapping):
+                continue
+            indexed_metrics.append((index, metric))
+            issues.extend(
+                _prefix_issues(
+                    f"$.metrics[{index}]",
+                    _metric_result_semantic_issues(metric, include_non_finite=False),
+                )
+            )
+            metric_id = metric.get("metric_id")
+            if isinstance(metric_id, str):
+                path = f"$.metrics[{index}].metric_id"
+                first_path = first_path_by_id.setdefault(metric_id, path)
+                if first_path != path:
+                    issues.append(
+                        ValidationIssue(
+                            path,
+                            f"duplicate metric_id {metric_id!r}; first declared at {first_path}",
+                        )
+                    )
+
+    issues.extend(_report_status_issues(instance, manifest, indexed_metrics))
+    issues.extend(_report_generated_at_issues(instance, manifest))
+    issues.extend(_structural_evidence_id_issues(instance))
+    issues.extend(_report_case_reference_issues(instance, manifest))
+    return issues
+
+
+def _report_status_issues(
+    report: Mapping[object, object],
+    manifest: object,
+    metrics: Sequence[tuple[int, Mapping[object, object]]],
+) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    report_status = report.get("status")
+    manifest_status = manifest.get("status") if isinstance(manifest, Mapping) else None
+    if (
+        isinstance(report_status, str)
+        and isinstance(manifest_status, str)
+        and report_status != manifest_status
+    ):
+        issues.append(
+            ValidationIssue(
+                "$.status",
+                f"must equal $.manifest.status ({manifest_status!r})",
+            )
+        )
+
+    if report_status != "completed":
+        return issues
+
+    incomplete_evidence = False
+    for index, metric in metrics:
+        if metric.get("status") != "complete":
+            incomplete_evidence = True
+            issues.append(
+                ValidationIssue(
+                    f"$.metrics[{index}].status",
+                    "must be 'complete' when the report status is 'completed'",
+                )
+            )
+
+    structural = report.get("structural_evidence")
+    if _is_array(structural):
+        for index, evidence in enumerate(structural):
+            if isinstance(evidence, Mapping) and evidence.get("status") != "complete":
+                incomplete_evidence = True
+                issues.append(
+                    ValidationIssue(
+                        f"$.structural_evidence[{index}].status",
+                        "must be 'complete' when the report status is 'completed'",
+                    )
+                )
+    if incomplete_evidence:
+        issues.append(
+            ValidationIssue(
+                "$.status",
+                "cannot be 'completed' while included evidence is incomplete or failed",
+            )
+        )
+    return issues
+
+
+def _report_generated_at_issues(
+    report: Mapping[object, object],
+    manifest: object,
+) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    generated_at = _parse_utc_timestamp(report.get("generated_at"), "$.generated_at", issues)
+    if not isinstance(manifest, Mapping):
+        return issues
+    timestamps = manifest.get("timestamps")
+    if not isinstance(timestamps, Mapping):
+        return issues
+
+    ignored_manifest_issues: list[ValidationIssue] = []
+    ended_at = _parse_utc_timestamp(
+        timestamps.get("ended_at"),
+        "$.manifest.timestamps.ended_at",
+        ignored_manifest_issues,
+    )
+    if generated_at is not None and ended_at is not None and generated_at < ended_at:
+        issues.append(
+            ValidationIssue(
+                "$.generated_at",
+                "must not precede $.manifest.timestamps.ended_at",
+            )
+        )
+    return issues
+
+
+def _structural_evidence_id_issues(
+    report: Mapping[object, object],
+) -> list[ValidationIssue]:
+    structural = report.get("structural_evidence")
+    if not _is_array(structural):
+        return []
+
+    issues: list[ValidationIssue] = []
+    first_path_by_id: dict[str, str] = {}
+    for index, evidence in enumerate(structural):
+        if not isinstance(evidence, Mapping):
+            continue
+        evidence_id = evidence.get("evidence_id")
+        if not isinstance(evidence_id, str):
+            continue
+        path = f"$.structural_evidence[{index}].evidence_id"
+        first_path = first_path_by_id.setdefault(evidence_id, path)
+        if first_path != path:
+            issues.append(
+                ValidationIssue(
+                    path,
+                    f"duplicate evidence_id {evidence_id!r}; first declared at {first_path}",
+                )
+            )
+    return issues
+
+
+def _report_case_reference_issues(
+    report: Mapping[object, object],
+    manifest: object,
+) -> list[ValidationIssue]:
+    report_case = report.get("audit_case")
+    if not isinstance(report_case, Mapping) or not isinstance(manifest, Mapping):
+        return []
+    manifest_case = manifest.get("audit_case")
+    if not isinstance(manifest_case, Mapping):
+        return []
+
+    issues: list[ValidationIssue] = []
+    if report_case.get("schema_version") != manifest_case.get("schema_version"):
+        issues.append(
+            ValidationIssue(
+                "$.audit_case.schema_version",
+                "must equal $.manifest.audit_case.schema_version",
+            )
+        )
+
+    report_artifact = report_case.get("artifact")
+    manifest_artifact = manifest_case.get("artifact")
+    if not isinstance(report_artifact, Mapping) or not isinstance(manifest_artifact, Mapping):
+        return issues
+    if report_case.get("case_id") != report_artifact.get("artifact_id"):
+        issues.append(
+            ValidationIssue(
+                "$.audit_case.case_id",
+                "must equal $.audit_case.artifact.artifact_id",
+            )
+        )
+    if report_artifact.get("artifact_id") != manifest_artifact.get("artifact_id"):
+        issues.append(
+            ValidationIssue(
+                "$.audit_case.artifact.artifact_id",
+                "must equal the audit-case artifact ID in the manifest",
+            )
+        )
+
+    report_hash = _comparable_hash(report_artifact.get("content_hash"))
+    manifest_hash = _comparable_hash(manifest_artifact.get("content_hash"))
+    if report_hash != manifest_hash:
+        issues.append(
+            ValidationIssue(
+                "$.audit_case.artifact.content_hash.digest",
+                "must equal the comparable audit-case content hash in the manifest",
+            )
+        )
+    if (
+        report_hash is None
+        and manifest_hash is None
+        and report_artifact.get("hash_unavailable")
+        != manifest_artifact.get("hash_unavailable")
+    ):
+        issues.append(
+            ValidationIssue(
+                "$.audit_case.artifact.hash_unavailable",
+                "must equal the audit-case hash-unavailable provenance in the manifest",
+            )
+        )
+    return issues
+
+
+def _prefix_issues(prefix: str, issues: Sequence[ValidationIssue]) -> list[ValidationIssue]:
+    return [
+        ValidationIssue(prefix + issue.path.removeprefix("$"), issue.message)
+        for issue in issues
+    ]
+
+
+def _is_array(value: object) -> TypeGuard[Sequence[object]]:
+    return isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray))
+
+
+def _is_integer(value: object) -> TypeGuard[int]:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _is_number(value: object) -> TypeGuard[int | float]:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
 def _model_state_issues(instance: Mapping[object, object]) -> list[ValidationIssue]:

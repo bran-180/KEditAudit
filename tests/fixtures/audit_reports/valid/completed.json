@@ -1,0 +1,210 @@
+{
+  "schema_version": "1.0.0",
+  "report_id": "report-20260820-001",
+  "status": "completed",
+  "generated_at": "2026-08-20T01:02:05Z",
+  "manifest": {
+    "schema_version": "1.0.0",
+    "run_id": "run-20260820-001",
+    "status": "completed",
+    "timestamps": {
+      "started_at": "2026-08-20T01:02:03Z",
+      "ended_at": "2026-08-20T01:02:05Z"
+    },
+    "kedit_audit": {
+      "version": "0.0.0",
+      "commit": "0123456789abcdef0123456789abcdef01234567",
+      "dirty": false
+    },
+    "environment": {
+      "python_version": "3.12.0",
+      "package_versions": {
+        "kedit-audit": "0.0.0"
+      },
+      "device": "cpu",
+      "dtype": "float32",
+      "quantization": {
+        "method": "none",
+        "configuration": {}
+      }
+    },
+    "model": {
+      "model_id": "synthetic/tiny-causal-lm",
+      "model_revision": "1111111111111111111111111111111111111111",
+      "tokenizer_id": "synthetic/tiny-tokenizer",
+      "tokenizer_revision": "2222222222222222222222222222222222222222",
+      "baseline": {
+        "artifact_id": "tiny-baseline",
+        "kind": "model-checkpoint",
+        "revision": "1111111111111111111111111111111111111111",
+        "content_hash": {
+          "algorithm": "sha256",
+          "encoding": "raw-bytes",
+          "digest": "0000000000000000000000000000000000000000000000000000000000000000",
+          "size_bytes": 128
+        }
+      },
+      "edited": {
+        "artifact_id": "tiny-edited",
+        "kind": "model-delta",
+        "revision": "3333333333333333333333333333333333333333",
+        "content_hash": {
+          "algorithm": "sha256",
+          "encoding": "raw-bytes",
+          "digest": "1111111111111111111111111111111111111111111111111111111111111111",
+          "size_bytes": 128
+        }
+      }
+    },
+    "audit_case": {
+      "schema_version": "1.0.0",
+      "artifact": {
+        "artifact_id": "eiffel-tower-relocation",
+        "kind": "audit-case",
+        "content_hash": {
+          "algorithm": "sha256",
+          "encoding": "kedit-audit-canonical-json-v1",
+          "digest": "2222222222222222222222222222222222222222222222222222222222222222",
+          "size_bytes": 1024
+        }
+      }
+    },
+    "editor": {
+      "adapter": "synthetic-fixture",
+      "revision": "4444444444444444444444444444444444444444",
+      "hyperparameters": {
+        "rank": 1
+      }
+    },
+    "generation": {
+      "do_sample": false,
+      "max_new_tokens": 1
+    },
+    "seeds": {
+      "numpy": 17,
+      "python": 17,
+      "torch": 17
+    },
+    "failure": null
+  },
+  "audit_case": {
+    "case_id": "eiffel-tower-relocation",
+    "schema_version": "1.0.0",
+    "artifact": {
+      "artifact_id": "eiffel-tower-relocation",
+      "kind": "audit-case",
+      "content_hash": {
+        "algorithm": "sha256",
+        "encoding": "kedit-audit-canonical-json-v1",
+        "digest": "2222222222222222222222222222222222222222222222222222222222222222",
+        "size_bytes": 1024
+      }
+    },
+    "dataset": {
+      "name": "synthetic-test-fixture",
+      "version": "1.0.0",
+      "license": "CC0-1.0",
+      "source": "locally-authored deterministic fixture"
+    }
+  },
+  "metrics": [
+    {
+      "schema_version": "1.0.0",
+      "metric_id": "generality.mean_target_log_probability_delta",
+      "status": "complete",
+      "direction": "higher-is-better",
+      "unit": "nats",
+      "aggregate": 0.375,
+      "reduction": "arithmetic_mean_over_available_probes",
+      "coverage": {
+        "total": 2,
+        "evaluated": 2,
+        "missing": 0,
+        "fraction": 1.0
+      },
+      "probes": [
+        {
+          "probe_id": "paraphrase-1",
+          "status": "evaluated",
+          "values": {
+            "baseline_mean_log_probability": -2.0,
+            "edited_mean_log_probability": -1.0,
+            "signed_delta": 1.0,
+            "absolute_delta": 1.0,
+            "contribution": 1.0
+          },
+          "missing_reason": null
+        },
+        {
+          "probe_id": "paraphrase-2",
+          "status": "evaluated",
+          "values": {
+            "baseline_mean_log_probability": -1.5,
+            "edited_mean_log_probability": -1.75,
+            "signed_delta": -0.25,
+            "absolute_delta": 0.25,
+            "contribution": -0.25
+          },
+          "missing_reason": null
+        }
+      ],
+      "warnings": [],
+      "citations": [
+        {
+          "title": "EasyEdit: An Easy-to-use Knowledge Editing Framework for Large Language Models",
+          "source": "https://aclanthology.org/2024.acl-demos.9/"
+        },
+        {
+          "title": "Locating and Editing Factual Associations in GPT",
+          "source": "https://rome.baulab.info/"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "metric_id": "locality.mean_absolute_target_log_probability_delta",
+      "status": "complete",
+      "direction": "lower-is-better",
+      "unit": "nats",
+      "aggregate": 0.1,
+      "reduction": "arithmetic_mean_over_available_probes",
+      "coverage": {
+        "total": 1,
+        "evaluated": 1,
+        "missing": 0,
+        "fraction": 1.0
+      },
+      "probes": [
+        {
+          "probe_id": "locality-1",
+          "status": "evaluated",
+          "values": {
+            "baseline_mean_log_probability": -1.0,
+            "edited_mean_log_probability": -1.1,
+            "signed_delta": -0.1,
+            "absolute_delta": 0.1,
+            "contribution": 0.1
+          },
+          "missing_reason": null
+        }
+      ],
+      "warnings": [],
+      "citations": [
+        {
+          "title": "EasyEdit: An Easy-to-use Knowledge Editing Framework for Large Language Models",
+          "source": "https://aclanthology.org/2024.acl-demos.9/"
+        },
+        {
+          "title": "Locating and Editing Factual Associations in GPT",
+          "source": "https://rome.baulab.info/"
+        }
+      ]
+    }
+  ],
+  "structural_evidence": [],
+  "limitations": [
+    "This synthetic fixture validates artifact behavior; it is not evidence about a real model edit.",
+    "Audit results are diagnostic evidence and do not certify model safety or the absence of harmful behavior."
+  ],
+  "warnings": []
+}
