@@ -7,6 +7,11 @@ from kedit_audit.artifacts.hashing import (
     hash_file,
     hash_json,
 )
+from kedit_audit.artifacts.io import (
+    DEFAULT_MAX_JSON_BYTES,
+    JsonInputError,
+    load_json_document,
+)
 from kedit_audit.artifacts.schema import (
     AUDIT_CASE_SCHEMA_VERSION,
     AUDIT_REPORT_SCHEMA_VERSION,
@@ -38,6 +43,7 @@ from kedit_audit.artifacts.schema import (
 __all__ = [
     "AUDIT_CASE_SCHEMA_VERSION",
     "AUDIT_REPORT_SCHEMA_VERSION",
+    "DEFAULT_MAX_JSON_BYTES",
     "EDITOR_ARTIFACT_SCHEMA_VERSION",
     "METRIC_RESULT_SCHEMA_VERSION",
     "RIPPLE_CASE_SCHEMA_VERSION",
@@ -46,6 +52,7 @@ __all__ = [
     "AuditCaseValidationError",
     "AuditReportValidationError",
     "EditorArtifactManifestValidationError",
+    "JsonInputError",
     "MetricResultValidationError",
     "RippleCaseValidationError",
     "RunManifestValidationError",
@@ -57,6 +64,7 @@ __all__ = [
     "load_audit_case_schema",
     "load_audit_report_schema",
     "load_editor_artifact_schema",
+    "load_json_document",
     "load_metric_result_schema",
     "load_ripple_case_schema",
     "load_run_manifest_schema",

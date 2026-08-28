@@ -138,6 +138,11 @@ Acceptance:
 - [x] 18. Define and validate a versioned portability/ripple case format.
 - [x] 19. Implement structural weight-diff metrics and incomplete-coverage warnings.
 - [x] 20. Audit and document Milestone 0–4 acceptance evidence.
+- [x] 21. Add a dependency-light CLI skeleton and safe `validate-case` command.
+- [ ] 22. Implement the audit runner state machine and persistent failure manifest.
+- [ ] 23. Write validated JSON reports and escaped deterministic Markdown.
+- [ ] 24. Compare two compatible validated reports without automatic conclusions.
+- [ ] 25. Complete Milestone 5 end-to-end, security, and acceptance validation.
 
 ## Prompt template for each Codex session
 

@@ -84,6 +84,7 @@ See:
 - [Threat model](docs/THREAT_MODEL.md)
 - [Sources and license inventory](docs/SOURCES_AND_LICENSES.md)
 - [Milestone 0–4 acceptance audit](docs/MILESTONE_ACCEPTANCE.md)
+- [Command-line interface](docs/CLI.md)
 
 ## Development status
 
