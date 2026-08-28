@@ -18,6 +18,7 @@ AUDIT_CASE_SCHEMA_VERSION = "1.0.0"
 RUN_MANIFEST_SCHEMA_VERSION = "1.0.0"
 METRIC_RESULT_SCHEMA_VERSION = "1.0.0"
 AUDIT_REPORT_SCHEMA_VERSION = "1.0.0"
+EDITOR_ARTIFACT_SCHEMA_VERSION = "1.0.0"
 _PROBE_GROUPS = ("exact", "paraphrase", "locality", "portability", "control")
 
 
@@ -76,6 +77,17 @@ class AuditReportValidationError(ValueError):
         super().__init__(f"AuditReport validation failed:\n{details}")
 
 
+class EditorArtifactManifestValidationError(ValueError):
+    """Raised when an EditorArtifact manifest violates its data contract."""
+
+    def __init__(self, issues: Sequence[ValidationIssue]) -> None:
+        if not issues:
+            raise ValueError("EditorArtifactManifestValidationError requires at least one issue")
+        self.issues = tuple(issues)
+        details = "\n".join(f"- {issue}" for issue in self.issues)
+        super().__init__(f"EditorArtifact manifest validation failed:\n{details}")
+
+
 def load_audit_case_schema() -> dict[str, Any]:
     """Return the packaged AuditCase schema as a new dictionary."""
 
@@ -98,6 +110,12 @@ def load_audit_report_schema() -> dict[str, Any]:
     """Return the packaged AuditReport schema as a new dictionary."""
 
     return _load_schema("audit_report.schema.json")
+
+
+def load_editor_artifact_schema() -> dict[str, Any]:
+    """Return the packaged EditorArtifact schema as a new dictionary."""
+
+    return _load_schema("editor_artifact.schema.json")
 
 
 def validate_audit_case(instance: object) -> None:
@@ -138,6 +156,15 @@ def validate_audit_report(instance: object) -> None:
     issues.extend(_audit_report_semantic_issues(instance))
     if issues:
         raise AuditReportValidationError(issues)
+
+
+def validate_editor_artifact_manifest(instance: object) -> None:
+    """Validate a bounded data-only external-editor manifest."""
+
+    issues = _schema_issues(load_editor_artifact_schema(), instance)
+    issues.extend(_editor_artifact_semantic_issues(instance))
+    if issues:
+        raise EditorArtifactManifestValidationError(issues)
 
 
 def _load_schema(resource_name: str) -> dict[str, Any]:
@@ -194,6 +221,57 @@ def _semantic_issues(instance: object) -> list[ValidationIssue]:
     issues = _prompt_template_issues(instance)
     issues.extend(_probe_id_issues(instance))
     issues.extend(_target_issues(instance))
+    return issues
+
+
+def _editor_artifact_semantic_issues(instance: object) -> list[ValidationIssue]:
+    if not isinstance(instance, Mapping):
+        return []
+    issues = _non_finite_number_issues(instance)
+    model = instance.get("model")
+    if isinstance(model, Mapping):
+        baseline = model.get("baseline")
+        edited = model.get("edited")
+        if isinstance(baseline, Mapping) and isinstance(edited, Mapping):
+            if baseline.get("state_id") == edited.get("state_id"):
+                issues.append(
+                    ValidationIssue(
+                        "$.model.edited.state_id",
+                        "must differ from $.model.baseline.state_id",
+                    )
+                )
+            if baseline.get("artifact_sha256") == edited.get("artifact_sha256"):
+                issues.append(
+                    ValidationIssue(
+                        "$.model.edited.artifact_sha256",
+                        "must differ from $.model.baseline.artifact_sha256",
+                    )
+                )
+
+    changed_tensors = instance.get("changed_tensors")
+    if _is_array(changed_tensors):
+        first_path_by_name: dict[str, str] = {}
+        for index, tensor in enumerate(changed_tensors):
+            if not isinstance(tensor, Mapping):
+                continue
+            name = tensor.get("name")
+            if isinstance(name, str):
+                path = f"$.changed_tensors[{index}].name"
+                first_path = first_path_by_name.setdefault(name, path)
+                if first_path != path:
+                    issues.append(
+                        ValidationIssue(
+                            path,
+                            f"duplicate changed tensor name {name!r}; first declared at {first_path}",
+                        )
+                    )
+            if tensor.get("baseline_sha256") == tensor.get("edited_sha256"):
+                issues.append(
+                    ValidationIssue(
+                        f"$.changed_tensors[{index}].edited_sha256",
+                        "must differ from baseline_sha256 for a reported changed tensor",
+                    )
+                )
     return issues
 
 

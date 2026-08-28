@@ -102,6 +102,13 @@ hashes but no tensor values. Binding rejects a shared model root, and paired
 scoring evaluates baseline, edited, then baseline again so an observed
 in-place contamination fails closed. See [`EDITOR_ADAPTER.md`](EDITOR_ADAPTER.md).
 
+The versioned editor manifest and `RomeArtifactAdapter` add a normalized ROME
+fixture boundary. The importer verifies official source identity, immutable
+revision, required hyperparameters, changed-tensor hashes, supported
+architecture, and distinct preloaded roots without importing or executing the
+ROME package. The current fixture is synthetic contract evidence, not a real
+edited checkpoint.
+
 ### `AuditCase`
 
 A versioned data contract containing:
@@ -247,7 +254,7 @@ Use toy tensors and a tiny local `nn.Module` to test:
 ### Integration tests
 
 - one in-memory two-layer GPT-2 under pinned Torch/Transformers versions;
-- one pinned official ROME output or fixture;
+- one pinned normalized ROME contract fixture;
 - one EasyEdit adapter fixture;
 - no large model in default CI;
 - downloaded-model tests opt in and cache by revision.

@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kedit-audit.dev/schemas/editor-artifact/1.0.0",
+  "title": "KEditAudit EditorArtifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_id",
+    "artifact_kind",
+    "editor",
+    "model",
+    "changed_tensors"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "artifact_kind": {
+      "enum": ["synthetic-contract-fixture", "external-export"]
+    },
+    "editor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "revision", "source_repository", "hyperparameters"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "source_repository": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 2048
+        },
+        "hyperparameters": {
+          "type": "object",
+          "maxProperties": 256
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["architecture", "baseline", "edited"],
+      "properties": {
+        "architecture": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        "baseline": { "$ref": "#/$defs/model_state" },
+        "edited": { "$ref": "#/$defs/model_state" }
+      }
+    },
+    "changed_tensors": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": { "$ref": "#/$defs/changed_tensor" }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "model_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state_id", "artifact_sha256"],
+      "properties": {
+        "state_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "artifact_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "changed_tensor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "shape",
+        "dtype",
+        "device",
+        "baseline_sha256",
+        "edited_sha256"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,511}$"
+        },
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "dtype": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "device": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "baseline_sha256": { "$ref": "#/$defs/sha256" },
+        "edited_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

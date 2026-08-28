@@ -22,6 +22,7 @@ from kedit_audit.adapters.model import (
     validate_adapter_pair,
 )
 from kedit_audit.adapters.modules import ModulePathError, resolve_module_path
+from kedit_audit.adapters.rome import ROME_SOURCE_REPOSITORY, RomeArtifactAdapter
 from kedit_audit.adapters.transformers import (
     SUPPORTED_TORCH_VERSION,
     SUPPORTED_TRANSFORMERS_VERSION,
@@ -31,6 +32,7 @@ from kedit_audit.adapters.transformers import (
 
 __all__ = [
     "EDITOR_ADAPTER_SCHEMA_VERSION",
+    "ROME_SOURCE_REPOSITORY",
     "SUPPORTED_TORCH_VERSION",
     "SUPPORTED_TRANSFORMERS_VERSION",
     "AdapterCompatibilityError",
@@ -49,6 +51,7 @@ __all__ = [
     "ModelMetadata",
     "ModulePathError",
     "PairedTargetScoreEvidence",
+    "RomeArtifactAdapter",
     "TokenSpan",
     "bind_editor_states",
     "resolve_module_path",
