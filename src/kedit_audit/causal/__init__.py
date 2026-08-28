@@ -8,12 +8,30 @@ from kedit_audit.causal.hooks import (
     HookRegistrationError,
     RemovableHookHandle,
 )
+from kedit_audit.causal.tracer import (
+    CAUSAL_TRACE_RESULT_VERSION,
+    CausalTraceAdapter,
+    CausalTraceRequest,
+    CausalTraceResult,
+    CleanTraceRun,
+    ModuleRestorationEvidence,
+    TraceValidationError,
+    run_causal_trace,
+)
 
 __all__ = [
+    "CAUSAL_TRACE_RESULT_VERSION",
+    "CausalTraceAdapter",
+    "CausalTraceRequest",
+    "CausalTraceResult",
+    "CleanTraceRun",
     "ForwardHook",
     "ForwardHookModule",
     "HookCleanupError",
     "HookManager",
     "HookRegistrationError",
+    "ModuleRestorationEvidence",
     "RemovableHookHandle",
+    "TraceValidationError",
+    "run_causal_trace",
 ]

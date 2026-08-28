@@ -200,6 +200,13 @@ on normal and exceptional exits, preserves an original model exception if
 cleanup also fails, and never coerces hook outputs. Its offline contract and
 limitations are documented in [`CAUSAL_TRACING.md`](CAUSAL_TRACING.md).
 
+The clean/corrupt/restore coordinator validates module paths before execution,
+derives the subject span through the adapter tokenizer, creates one corruption
+object, and reuses that exact object for the corrupted and all restoration
+runs. Its versioned JSON-ready evidence retains raw scores and recovery
+reductions without serializing prompts or tensors. This is an offline fake-
+adapter prototype, not a pinned Transformers integration.
+
 ## 6. Testing strategy
 
 ### Offline unit tests

@@ -4,7 +4,9 @@
 
 KEditAudit compares a baseline model with an edited model and produces a reproducible audit artifact. It focuses on what changed, what remained stable, and which claims the available evidence can or cannot support.
 
-This repository is currently a reviewed project blueprint and minimal Python package skeleton. It does **not** yet implement ROME, MEMIT, causal tracing, or a safety certification system.
+This repository is currently a reviewed project blueprint and minimal Python
+package. It does **not** yet implement ROME, MEMIT, a real-model causal-tracing
+integration, or a safety certification system.
 
 ## Why this project
 
@@ -83,7 +85,9 @@ supplied logits. It also implements coverage-aware generality and locality
 reductions over paired probe scores. Model adapters, report generation and
 Markdown rendering, other metric reducers, and the CLI remain planned work and
 are not yet implemented. A deterministic `ModelAdapter` protocol and offline
-fake are available for tests, but no external model adapter is implemented.
+fake are available for tests, together with safe module resolution, hook
+lifecycle management, and an offline clean/corrupt/restore coordinator. No
+external or Transformers model adapter is implemented.
 
 ```powershell
 python -m pip install -e ".[dev]"
