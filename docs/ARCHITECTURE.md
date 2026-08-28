@@ -139,6 +139,13 @@ absolute deltas, coverage, warnings, and missing reasons. Missing pairs are not
 treated as zero; the exact reductions are documented in
 [`METRICS.md`](METRICS.md#generality-and-locality-reductions).
 
+The control-distribution reducer computes directed
+`KL(baseline || edited)` from supplied aligned logits. It retains every
+position divergence and probe mean, records temperature and coverage, and
+requires identical position and vocabulary dimensions. It imports no model
+library and is documented in
+[`METRICS.md`](METRICS.md#control-distribution-kl-divergence).
+
 ### `AuditReport`
 
 The report combines the manifest, case metadata, metric results, structural evidence, and limitations. JSON is authoritative; Markdown is a deterministic rendering of JSON.

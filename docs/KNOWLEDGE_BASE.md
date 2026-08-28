@@ -64,12 +64,12 @@ D_{KL}\left(P_{\theta}(\cdot\mid x)\parallel P_{\theta'}(\cdot\mid x)\right).
 
 The vocabulary support, token position, temperature, and numerical precision must be recorded. Do not call this value a universal “ripple index” unless the exact definition and benchmark are versioned.
 
-Before full control-distribution divergence is implemented, KEditAudit provides
-a narrower locality diagnostic: mean absolute baseline-to-edited change in the
-reference target's mean log-probability over versioned locality probes. This
-retains signed per-probe changes but uses their absolute values in the
-aggregate. It is not interchangeable with KL divergence, top-k agreement, or
-generation-based locality. See
+KEditAudit implements this directed baseline-to-edited KL divergence over
+caller-supplied aligned logits, retaining every per-position and per-probe
+value. It also provides a narrower locality diagnostic: mean absolute
+baseline-to-edited change in the reference target's mean log-probability over
+versioned locality probes. The two metrics are not interchangeable. See
+[`METRICS.md`](METRICS.md#control-distribution-kl-divergence) and
 [`METRICS.md`](METRICS.md#generality-and-locality-reductions).
 
 ### 2.4 Portability and ripple effects

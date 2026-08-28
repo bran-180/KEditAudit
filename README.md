@@ -84,7 +84,8 @@ The package currently implements versioned `AuditCase`, `RunManifest`,
 `MetricResult`, and `AuditReport` JSON Schemas, offline validation APIs,
 deterministic artifact hashing, and target sequence log-probability from
 supplied logits. It also implements coverage-aware generality and locality
-reductions over paired probe scores. A deterministic `ModelAdapter` protocol,
+reductions over paired probe scores and directed KL control-distribution drift
+over aligned logits. A deterministic `ModelAdapter` protocol,
 offline fake, and a pinned CPU/float32 `GPT2LMHeadModel` scoring adapter are
 available, together with safe module resolution, hook lifecycle management,
 an offline clean/corrupt/restore coordinator, and a pinned GPT-2 activation

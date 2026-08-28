@@ -134,7 +134,7 @@ available even though absolute deltas contribute to the aggregate.
 This is a narrow target-score locality diagnostic. It does not measure full
 distribution drift, top-k agreement, generation changes, or every possible
 side effect. In particular, it is not the KL control-divergence metric planned
-elsewhere in the roadmap.
+below.
 
 ### Coverage and result contract
 
@@ -153,3 +153,45 @@ an incomplete run; this reducer does not silently make that policy decision.
 Neither reduction emits a PASS/FAIL threshold. Generality on a finite probe set
 does not establish universal generalization, and low measured locality drift is
 not a safety guarantee.
+
+## Control-distribution KL divergence
+
+Status: implemented over caller-supplied, position-aligned baseline and edited
+logits.
+
+For each control probe position, KEditAudit computes the directed divergence
+
+\[
+D_{KL}(P_{baseline}\parallel P_{edited}) =
+\sum_v P_{baseline}(v)
+\log\frac{P_{baseline}(v)}{P_{edited}(v)}.
+\]
+
+The definition follows Kullback and Leibler's primary paper,
+[“On Information and Sufficiency”](https://doi.org/10.1214/aoms/1177729694).
+Both distributions are obtained with stable log-softmax after dividing logits
+by the recorded positive `temperature`. Baseline and edited rows must have the
+same positions, vocabulary size, and vocabulary ordering; the reducer cannot
+verify tokenizer identity from numeric arrays alone.
+
+The metric ID is `control.mean_kl_divergence`, direction is
+`baseline||edited`, unit is `nats`, and lower values mean less measured drift on
+the supplied controls. A probe contribution is the arithmetic mean of all its
+position KL values. The final aggregate is the arithmetic mean of complete
+probe contributions, so probes receive equal weight even when they contain
+different numbers of positions.
+
+`ControlDivergenceReduction.as_dict()` retains every position divergence,
+per-probe mean, position and vocabulary counts, temperature, probe coverage,
+missing reasons, warnings, and the final aggregate. It deliberately does not
+retain vocabulary-sized logits. Missing pairs are excluded with an explicit
+warning and are never substituted with zero.
+
+The implementation rejects non-finite numbers, inconsistent shapes, duplicate
+probe IDs, invalid temperatures, and inputs beyond documented resource limits.
+Tiny negative KL values caused only by floating-point rounding are clamped to
+zero within a `1e-12` tolerance; larger negative results fail closed.
+
+KL divergence is asymmetric and control-set dependent. A low value does not
+show that every unrelated behavior is unchanged and is not evidence that a
+model or edit is safe.
