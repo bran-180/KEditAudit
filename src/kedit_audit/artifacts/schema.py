@@ -19,7 +19,16 @@ RUN_MANIFEST_SCHEMA_VERSION = "1.0.0"
 METRIC_RESULT_SCHEMA_VERSION = "1.0.0"
 AUDIT_REPORT_SCHEMA_VERSION = "1.0.0"
 EDITOR_ARTIFACT_SCHEMA_VERSION = "1.0.0"
+RIPPLE_CASE_SCHEMA_VERSION = "1.0.0"
 _PROBE_GROUPS = ("exact", "paraphrase", "locality", "portability", "control")
+_RIPPLE_GROUPS = (
+    "relation_specificity",
+    "logical_generalization",
+    "subject_aliasing",
+    "compositionality_i",
+    "compositionality_ii",
+    "forgetfulness",
+)
 
 
 @dataclass(frozen=True)
@@ -88,6 +97,17 @@ class EditorArtifactManifestValidationError(ValueError):
         super().__init__(f"EditorArtifact manifest validation failed:\n{details}")
 
 
+class RippleCaseValidationError(ValueError):
+    """Raised when a RippleCase violates its structural or semantic contract."""
+
+    def __init__(self, issues: Sequence[ValidationIssue]) -> None:
+        if not issues:
+            raise ValueError("RippleCaseValidationError requires at least one issue")
+        self.issues = tuple(issues)
+        details = "\n".join(f"- {issue}" for issue in self.issues)
+        super().__init__(f"RippleCase validation failed:\n{details}")
+
+
 def load_audit_case_schema() -> dict[str, Any]:
     """Return the packaged AuditCase schema as a new dictionary."""
 
@@ -116,6 +136,12 @@ def load_editor_artifact_schema() -> dict[str, Any]:
     """Return the packaged EditorArtifact schema as a new dictionary."""
 
     return _load_schema("editor_artifact.schema.json")
+
+
+def load_ripple_case_schema() -> dict[str, Any]:
+    """Return the packaged RippleCase schema as a new dictionary."""
+
+    return _load_schema("ripple_case.schema.json")
 
 
 def validate_audit_case(instance: object) -> None:
@@ -165,6 +191,15 @@ def validate_editor_artifact_manifest(instance: object) -> None:
     issues.extend(_editor_artifact_semantic_issues(instance))
     if issues:
         raise EditorArtifactManifestValidationError(issues)
+
+
+def validate_ripple_case(instance: object) -> None:
+    """Validate one versioned portability/ripple case and its provenance."""
+
+    issues = _schema_issues(load_ripple_case_schema(), instance)
+    issues.extend(_ripple_case_semantic_issues(instance))
+    if issues:
+        raise RippleCaseValidationError(issues)
 
 
 def _load_schema(resource_name: str) -> dict[str, Any]:
@@ -272,6 +307,77 @@ def _editor_artifact_semantic_issues(instance: object) -> list[ValidationIssue]:
                         "must differ from baseline_sha256 for a reported changed tensor",
                     )
                 )
+    return issues
+
+
+def _ripple_case_semantic_issues(instance: object) -> list[ValidationIssue]:
+    if not isinstance(instance, Mapping):
+        return []
+    issues: list[ValidationIssue] = []
+    edit = instance.get("edit")
+    if isinstance(edit, Mapping):
+        target_new = edit.get("target_new")
+        target_original = edit.get("target_original")
+        if isinstance(target_new, str) and target_new == target_original:
+            issues.append(
+                ValidationIssue(
+                    "$.edit.target_original",
+                    "must differ from $.edit.target_new when supplied",
+                )
+            )
+
+    probes = instance.get("probes")
+    total_probe_count = 0
+    first_path_by_id: dict[str, str] = {}
+    if isinstance(probes, Mapping):
+        for group_name in _RIPPLE_GROUPS:
+            group = probes.get(group_name)
+            if not _is_array(group):
+                continue
+            total_probe_count += len(group)
+            for index, probe in enumerate(group):
+                if not isinstance(probe, Mapping):
+                    continue
+                probe_id = probe.get("probe_id")
+                if not isinstance(probe_id, str):
+                    continue
+                path = f"$.probes.{group_name}[{index}].probe_id"
+                first_path = first_path_by_id.setdefault(probe_id, path)
+                if first_path != path:
+                    issues.append(
+                        ValidationIssue(
+                            path,
+                            f"duplicate probe_id {probe_id!r}; first declared at {first_path}",
+                        )
+                    )
+        if total_probe_count == 0:
+            issues.append(
+                ValidationIssue(
+                    "$.probes",
+                    "must contain at least one probe across the six ripple categories",
+                )
+            )
+
+    provenance = instance.get("provenance")
+    if isinstance(provenance, Mapping):
+        upstream_case_id = provenance.get("upstream_case_id")
+        artifact_kind = instance.get("artifact_kind")
+        if artifact_kind == "external-benchmark-case" and not isinstance(
+            upstream_case_id, str
+        ):
+            issues.append(
+                ValidationIssue(
+                    "$.provenance.upstream_case_id",
+                    "is required for an external-benchmark-case",
+                )
+            )
+        if artifact_kind == "synthetic-contract-fixture" and upstream_case_id is not None:
+            issues.append(
+                ValidationIssue(
+                    "$.provenance.upstream_case_id",
+                    "must be omitted for a synthetic-contract-fixture",
+                )
+            )
     return issues
 
 

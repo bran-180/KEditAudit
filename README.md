@@ -70,6 +70,7 @@ See:
 - [MetricResult and AuditReport contracts](docs/AUDIT_REPORT.md)
 - [ModelAdapter contract and offline fake](docs/MODEL_ADAPTER.md)
 - [Editor artifact contract and lifecycle](docs/EDITOR_ADAPTER.md)
+- [RippleCase contract](docs/RIPPLE_CASE.md)
 - [Causal-tracing primitives](docs/CAUSAL_TRACING.md)
 - [Implemented metric definitions](docs/METRICS.md)
 - [Roadmap](docs/ROADMAP.md)

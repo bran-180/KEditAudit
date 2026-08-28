@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "case_id": "synthetic-ripple-1",
+  "artifact_kind": "synthetic-contract-fixture",
+  "edit": {
+    "subject": "Ada Example",
+    "prompt": "Ada Example now works in Harbor City.",
+    "target_new": "Harbor City",
+    "target_original": "Old Town"
+  },
+  "provenance": {
+    "dataset_name": "KEditAudit synthetic RippleCase",
+    "dataset_revision": "synthetic-v1",
+    "dataset_license": "Apache-2.0",
+    "source_url": "https://github.com/edenbiran/RippleEdits",
+    "source_revision": "54f3b88af4895a3aacb580ec63ce7ae857185040"
+  },
+  "probes": {
+    "relation_specificity": [
+      {
+        "probe_id": "relation-specificity-1",
+        "prompt": "Ada Example's favorite color is",
+        "expectation": "baseline-preservation",
+        "expected_answers": ["blue"],
+        "relation": "favorite_color"
+      }
+    ],
+    "logical_generalization": [
+      {
+        "probe_id": "logical-generalization-1",
+        "prompt": "The city where Ada Example works is",
+        "expectation": "edited-target",
+        "expected_answers": ["Harbor City"],
+        "relation": "work_location"
+      }
+    ],
+    "subject_aliasing": [
+      {
+        "probe_id": "subject-aliasing-1",
+        "prompt": "A. Example works in",
+        "expectation": "edited-target",
+        "expected_answers": ["Harbor City"],
+        "relation": "work_location"
+      }
+    ],
+    "compositionality_i": [
+      {
+        "probe_id": "compositionality-i-1",
+        "prompt": "The region containing Ada Example's workplace is",
+        "expectation": "edited-target",
+        "expected_answers": ["North Coast"],
+        "relation": "region"
+      }
+    ],
+    "compositionality_ii": [
+      {
+        "probe_id": "compositionality-ii-1",
+        "prompt": "The transit system serving Ada Example's workplace is",
+        "expectation": "edited-target",
+        "expected_answers": ["Harbor Metro"],
+        "relation": "transit_system",
+        "condition": {
+          "operator": "all",
+          "queries": [
+            {
+              "prompt": "Ada Example works in",
+              "expected_answers": ["Harbor City"]
+            }
+          ]
+        }
+      }
+    ],
+    "forgetfulness": [
+      {
+        "probe_id": "forgetfulness-1",
+        "prompt": "Ada Example's profession is",
+        "expectation": "baseline-preservation",
+        "expected_answers": ["engineer"],
+        "relation": "profession"
+      }
+    ]
+  }
+}

@@ -132,6 +132,13 @@ Version `1.0.0` is implemented as a Draft 2020-12 JSON Schema and documented in
 [`AUDIT_CASE.md`](AUDIT_CASE.md). Its validator also enforces cross-category
 probe-ID uniqueness and the single `{subject}` template field.
 
+`RippleCase` version `1.0.0` is a separate portability/ripple input contract
+with six normalized RippleEdits-inspired categories. It requires explicit
+edited-target versus baseline-preservation expectations, raw expected answers,
+global probe-ID uniqueness, and dataset/source/license revisions. Only a
+fictional synthetic fixture is redistributed. See
+[`RIPPLE_CASE.md`](RIPPLE_CASE.md).
+
 ### `MetricResult`
 
 Every metric result contains:
