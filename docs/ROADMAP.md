@@ -124,7 +124,7 @@ Acceptance:
 - [x] 4. Implement sequence log-probability from supplied logits.
 - [x] 5. Implement generality/locality reductions with raw evidence retention.
 - [x] 6. Implement `AuditReport` round-trip validation.
-- [ ] 7. Build a toy-model `ModelAdapter` protocol and fake adapter.
+- [x] 7. Build a toy-model `ModelAdapter` protocol and fake adapter.
 - [ ] 8. Implement and test numeric module-path resolution.
 - [ ] 9. Implement a deterministic `HookManager` and cleanup tests.
 - [ ] 10. Implement clean/corrupt/restore tracing with one fixed corruption tensor.

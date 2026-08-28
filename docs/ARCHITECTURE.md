@@ -14,6 +14,7 @@ kedit-audit/
 │   ├── GEMINI_REVIEW.md
 │   ├── KNOWLEDGE_BASE.md
 │   ├── METRICS.md
+│   ├── MODEL_ADAPTER.md
 │   ├── OSS_APPLICATION_DRAFT.md
 │   ├── PROJECT_BRIEF.md
 │   ├── RUN_MANIFEST.md
@@ -70,6 +71,11 @@ Responsibilities:
 - expose named modules through a tested mapping;
 - describe model/tokenizer revision, dtype, and device;
 - provide stable baseline/edited identifiers.
+
+The runtime protocol, immutable metadata, baseline/edited pair validation, and
+deterministic offline fake are implemented and documented in
+[`MODEL_ADAPTER.md`](MODEL_ADAPTER.md). No Transformers or external-editor
+compatibility is claimed by this test contract.
 
 ### `EditorArtifactAdapter`
 

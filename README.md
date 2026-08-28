@@ -66,6 +66,7 @@ See:
 - [AuditCase contract](docs/AUDIT_CASE.md)
 - [RunManifest and artifact hashing](docs/RUN_MANIFEST.md)
 - [MetricResult and AuditReport contracts](docs/AUDIT_REPORT.md)
+- [ModelAdapter contract and offline fake](docs/MODEL_ADAPTER.md)
 - [Implemented metric definitions](docs/METRICS.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Review of the Gemini draft](docs/GEMINI_REVIEW.md)
@@ -80,7 +81,8 @@ deterministic artifact hashing, and target sequence log-probability from
 supplied logits. It also implements coverage-aware generality and locality
 reductions over paired probe scores. Model adapters, report generation and
 Markdown rendering, other metric reducers, and the CLI remain planned work and
-are not yet implemented.
+are not yet implemented. A deterministic `ModelAdapter` protocol and offline
+fake are available for tests, but no external model adapter is implemented.
 
 ```powershell
 python -m pip install -e ".[dev]"
