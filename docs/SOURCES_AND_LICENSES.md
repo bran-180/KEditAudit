@@ -1,6 +1,6 @@
 # Sources, citations, and license inventory
 
-Inventory date: 2026-08-28
+Inventory date: 2026-08-29
 
 This inventory distinguishes citations from redistribution permission. A paper
 or public repository can be citable without granting permission to redistribute

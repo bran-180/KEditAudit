@@ -4,16 +4,16 @@ This is a working draft. Replace projections with repository evidence before sub
 
 ## Project name
 
-**KEditAudit**. The name and distribution namespace were checked on 2026-08-16;
+**KEditAudit**. The name and distribution namespace were checked on 2026-08-29;
 availability must be checked again immediately before public publication.
 
 ## Project summary — English
 
-KEditAudit is an open-source, editor-agnostic audit toolkit for measuring the intended and unintended effects of knowledge edits in autoregressive language models. It compares baseline and edited model states across efficacy, paraphrase generality, neighborhood locality, logical portability, control-distribution drift, and structural weight changes, then emits a versioned JSON report with complete experiment provenance. Rather than duplicating existing editing frameworks, KEditAudit provides a reproducible evidence layer that can consume outputs from tools such as the official ROME implementation and EasyEdit.
+KEditAudit is an open-source, editor-agnostic audit toolkit under active development for measuring the intended and unintended effects of knowledge edits in autoregressive language models. Its implemented contracts and metric engine compare supplied baseline and edited evidence across target efficacy, paraphrase generality, neighborhood locality, control-distribution drift, and structural weight changes; the end-to-end runner that will emit a versioned JSON report is planned for Milestone 5. Rather than duplicating existing editing frameworks, KEditAudit is building a reproducible evidence layer around normalized outputs from tools such as the official ROME implementation and EasyEdit.
 
 ## 專案摘要 — 繁體中文
 
-KEditAudit 是一套開源、與編輯演算法解耦的知識編輯審計工具，用於量測自回歸語言模型在編輯前後的預期效果與非預期影響。它比較 baseline 與 edited model 在編輯效能、釋義泛化、鄰域保真、邏輯可遷移性、控制分布漂移與權重結構變化上的差異，並輸出包含完整實驗來源的版本化 JSON 報告。KEditAudit 不重複打造另一套編輯算法集合，而是提供可接收官方 ROME、EasyEdit 等工具輸出的可重現證據層。
+KEditAudit 是一套正在開發中的開源、與編輯演算法解耦的知識編輯審計工具。現有版本已能以版本化契約與確定性指標引擎，分析外部提供的 baseline 與 edited 證據，包括目標效能、釋義泛化、鄰域保真、控制分布漂移與權重結構變化；會輸出完整版本化 JSON 報告的端到端 runner 則規劃於 Milestone 5。KEditAudit 不重複打造另一套編輯算法集合，而是逐步建立可接收官方 ROME、EasyEdit 等工具正規化輸出的可重現證據層。
 
 ## Community impact — English
 

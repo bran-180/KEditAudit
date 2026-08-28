@@ -66,6 +66,17 @@ def test_completed_report_survives_json_round_trip_with_raw_evidence() -> None:
     )
 
 
+def test_same_report_fixture_always_produces_identical_bytes_and_hash() -> None:
+    expected_bytes = canonical_json_bytes(_load_report())
+    expected_hash = hash_json(_load_report())
+
+    for _ in range(3):
+        report = _load_report()
+        validate_audit_report(report)
+        assert canonical_json_bytes(report) == expected_bytes
+        assert hash_json(report) == expected_hash
+
+
 def test_metric_result_rejects_inconsistent_coverage_with_actionable_path() -> None:
     metric = copy.deepcopy(_load_report()["metrics"][0])
     metric["coverage"]["evaluated"] = 0

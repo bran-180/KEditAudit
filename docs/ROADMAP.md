@@ -14,7 +14,7 @@ Deliverables:
 
 Acceptance:
 
-- no README feature is described as implemented;
+- no unimplemented README feature is described as implemented;
 - every proposed metric has a definition and primary source;
 - the distinction from EasyEdit is explicit.
 
@@ -137,7 +137,7 @@ Acceptance:
 - [x] 17. Import a pinned EasyEdit result manifest and retain changed-tensor inventory.
 - [x] 18. Define and validate a versioned portability/ripple case format.
 - [x] 19. Implement structural weight-diff metrics and incomplete-coverage warnings.
-- [ ] 20. Audit and document Milestone 0–4 acceptance evidence.
+- [x] 20. Audit and document Milestone 0–4 acceptance evidence.
 
 ## Prompt template for each Codex session
 

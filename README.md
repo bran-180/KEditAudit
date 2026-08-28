@@ -2,7 +2,11 @@
 
 > An audit-first toolkit for measuring the observable effects of knowledge edits in language models.
 
-KEditAudit compares a baseline model with an edited model and produces a reproducible audit artifact. It focuses on what changed, what remained stable, and which claims the available evidence can or cannot support.
+KEditAudit is being built to compare baseline and edited model states through
+reproducible audit artifacts. The implemented core currently provides
+versioned contracts, deterministic evidence reducers, narrow model/editor
+adapters, and causal-tracing primitives; the end-to-end CLI and report writer
+remain Milestone 5 work.
 
 This repository is currently a reviewed project blueprint and early Python
 package. It does **not** yet implement ROME, MEMIT, broad model-family support,
@@ -79,6 +83,7 @@ See:
 - [Name, license, and citation decision](docs/NAME_AND_CITATION.md)
 - [Threat model](docs/THREAT_MODEL.md)
 - [Sources and license inventory](docs/SOURCES_AND_LICENSES.md)
+- [Milestone 0–4 acceptance audit](docs/MILESTONE_ACCEPTANCE.md)
 
 ## Development status
 
@@ -93,8 +98,8 @@ available, together with safe module resolution, hook lifecycle management,
 an offline clean/corrupt/restore coordinator, and a pinned GPT-2 activation
 adapter. The GPT-2 integration adds deterministic subject-embedding noise,
 restores clean subject states at verified transformer blocks, and emits ordered
-JSON-ready heatmap evidence. Report generation, Markdown rendering, other
-metric reducers and the CLI remain planned work. A versioned data-only editor
+JSON-ready heatmap evidence. End-to-end audit orchestration, report generation,
+Markdown rendering, and the CLI remain planned work. A versioned data-only editor
 manifest and fail-closed normalized ROME and EasyEdit fixture importers are
 implemented; no upstream editor code or checkpoint is executed.
 Coverage-aware structural weight differences are also implemented for supplied

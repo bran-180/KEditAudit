@@ -25,6 +25,12 @@ These checks reduce the risk of an obvious naming collision. They do not reserve
 a GitHub or PyPI namespace and are not a trademark opinion. Repeat the checks
 immediately before creating public accounts or publishing a package.
 
+The checks were repeated on 2026-08-29. GitHub returned one exact-name
+repository, the project's own public `bran-180/KEditAudit`; PyPI still returned
+HTTP 404 for `kedit-audit`; Crossref returned zero title results; and an exact
+web search found no unrelated software or paper match. This dated recheck still
+does not reserve the package name or establish trademark clearance.
+
 ## License
 
 KEditAudit is licensed under the Apache License 2.0. The repository contains the

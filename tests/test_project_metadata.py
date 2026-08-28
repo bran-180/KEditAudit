@@ -59,7 +59,22 @@ def test_governance_docs_cover_required_threats_and_license_decisions() -> None:
         "github.com/zjunlp/EasyEdit",
         "github.com/edenbiran/RippleEdits",
         "10.1214/aoms/1177729694",
+        "press.jhu.edu/books/title/10678/matrix-computations",
+        "numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html",
         "CounterFact",
         "unknown license",
     ):
         assert required_source in inventory
+
+
+def test_milestone_zero_through_four_acceptance_is_documented() -> None:
+    acceptance = (PROJECT_ROOT / "docs" / "MILESTONE_ACCEPTANCE.md").read_text(
+        encoding="utf-8"
+    )
+    roadmap = (PROJECT_ROOT / "docs" / "ROADMAP.md").read_text(encoding="utf-8")
+
+    for milestone in range(5):
+        assert f"## Milestone {milestone} —" in acceptance
+    for issue in range(13, 21):
+        assert f"- [x] {issue}." in roadmap
+    assert "Milestones 5 and 6 remain intentionally open" in acceptance

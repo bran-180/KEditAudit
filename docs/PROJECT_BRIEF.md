@@ -4,13 +4,14 @@
 
 - Project name: **KEditAudit**
 - Original Gemini codename: **EditScope**
-- One-line description: An editor-agnostic toolkit that produces reproducible evidence about the intended and unintended effects of a language-model knowledge edit.
+- One-line description: An editor-agnostic toolkit for producing reproducible evidence about the intended and unintended effects of a language-model knowledge edit.
 - License: Apache-2.0.
 
 The codename was changed because “EditScope” is already used in current
-model-editing research. On 2026-08-16, exact checks of GitHub, PyPI, Crossref,
-and general web results found no conflicting KEditAudit project. Repeat the
-checks before public publication because availability is not a reservation.
+model-editing research. On 2026-08-29, repeat checks of GitHub, PyPI, Crossref,
+and general web results found only this project's public GitHub repository and
+no unrelated KEditAudit package or paper. Repeat the checks before publishing a
+package because availability is not a reservation.
 
 ## Problem
 
@@ -34,9 +35,11 @@ KEditAudit is an **audit layer**, not an editor catalogue. Editing is performed 
 - optional causal tracing and weight-diff analysis;
 - reproducible reports.
 
-## MVP use case
+## Planned MVP use case
 
-Given a tiny supported autoregressive model, a baseline state, an edited state, and a small versioned audit case, one command produces a JSON and Markdown report containing:
+When Milestone 5 is complete, a tiny supported autoregressive model, a baseline
+state, an edited state, and a small versioned audit case will be sufficient for
+one command to produce a JSON and Markdown report containing:
 
 - target-sequence log-probability before and after the edit;
 - exact-prompt efficacy;
