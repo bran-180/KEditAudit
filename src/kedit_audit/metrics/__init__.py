@@ -18,6 +18,13 @@ from kedit_audit.metrics.distributional import (
     PairedControlLogits,
     reduce_control_kl_divergence,
 )
+from kedit_audit.metrics.structural import (
+    StructuralDifferenceResult,
+    StructuralDifferenceValidationError,
+    TensorDifferenceEvidence,
+    WeightTensorPair,
+    analyze_weight_differences,
+)
 
 __all__ = [
     "ControlDivergenceReduction",
@@ -30,6 +37,11 @@ __all__ = [
     "ProbeScoreEvidence",
     "ProbeScoreReduction",
     "SequenceLogProbability",
+    "StructuralDifferenceResult",
+    "StructuralDifferenceValidationError",
+    "TensorDifferenceEvidence",
+    "WeightTensorPair",
+    "analyze_weight_differences",
     "reduce_control_kl_divergence",
     "reduce_generality_log_probability_deltas",
     "reduce_locality_log_probability_drift",

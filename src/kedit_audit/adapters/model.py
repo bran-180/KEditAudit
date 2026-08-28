@@ -6,7 +6,10 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Literal, Protocol, runtime_checkable
 
-from kedit_audit.metrics import SequenceLogProbability, target_sequence_log_probability
+from kedit_audit.metrics.behavioral import (
+    SequenceLogProbability,
+    target_sequence_log_probability,
+)
 
 ModelStateKind = Literal["baseline", "edited"]
 

@@ -9,7 +9,10 @@ from contextlib import AbstractContextManager
 from typing import Protocol, cast
 
 from kedit_audit.adapters.model import AdapterInputError, ModelMetadata, TokenSpan
-from kedit_audit.metrics import SequenceLogProbability, target_sequence_log_probability
+from kedit_audit.metrics.behavioral import (
+    SequenceLogProbability,
+    target_sequence_log_probability,
+)
 
 SUPPORTED_TRANSFORMERS_VERSION = "5.16.1"
 SUPPORTED_TORCH_VERSION = "2.13.0"

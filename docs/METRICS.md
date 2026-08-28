@@ -195,3 +195,53 @@ zero within a `1e-12` tolerance; larger negative results fail closed.
 KL divergence is asymmetric and control-set dependent. A low value does not
 show that every unrelated behavior is unchanged and is not evidence that a
 model or edit is safe.
+
+## Structural weight differences
+
+Status: implemented over caller-supplied, flattened baseline and edited tensor
+values that correspond to a `ChangedTensorRecord` inventory.
+
+For each complete tensor pair, KEditAudit computes:
+
+\[
+\Delta W = W_{edited} - W_{baseline},
+\qquad
+\|\Delta W\|_F = \sqrt{\sum_i |\Delta W_i|^2},
+\]
+
+and, when the baseline norm is nonzero, the descriptive relative change
+
+\[
+r_F = \frac{\|\Delta W\|_F}{\|W_{baseline}\|_F}.
+\]
+
+The Frobenius definition and the matrix 2-norm as the largest singular value
+follow Golub and Van Loan's
+[Matrix Computations](https://www.press.jhu.edu/books/title/10678/matrix-computations)
+and the official [NumPy norm reference](https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html).
+The core implementation remains Python-standard-library-only and does not copy
+NumPy code.
+
+The aggregate delta is the Euclidean norm across the available per-tensor
+Frobenius deltas. This is equivalent to the Frobenius norm of the available
+tensors treated as one flattened vector. Its relative form uses the same
+aggregation over the corresponding available baseline tensors. Neither value
+is silently treated as complete when inventory entries are missing.
+
+When `spectral_iterations` is requested, rank-two deltas also receive a
+deterministic power-iteration estimate of the largest singular value. It is
+explicitly labeled as an estimate, records its iteration count, and is not
+presented as an exact SVD. Non-matrix tensors retain a warning and a null
+spectral value. Numeric size and work limits fail closed before an unbounded
+calculation.
+
+`StructuralDifferenceResult.as_dict()` preserves inventory order and includes
+each tensor's name, shape, dtype, device, baseline/edited artifact hashes,
+norms, coverage status, missing reason, and warnings. It deliberately omits raw
+tensor values and checkpoints. An unsupplied or partial pair produces a
+missing evidence row; it never contributes a zero to the aggregate.
+
+These norms measure parameter-space magnitude. A small or large norm alone
+does not identify the edited fact, explain behavior, establish causality, prove
+locality, or show semantic harm. The result therefore has no automatic
+PASS/FAIL direction and always carries a descriptive-only warning.

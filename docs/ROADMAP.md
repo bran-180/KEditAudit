@@ -136,7 +136,7 @@ Acceptance:
 - [x] 16. Import a pinned ROME result manifest without executing upstream code.
 - [x] 17. Import a pinned EasyEdit result manifest and retain changed-tensor inventory.
 - [x] 18. Define and validate a versioned portability/ripple case format.
-- [ ] 19. Implement structural weight-diff metrics and incomplete-coverage warnings.
+- [x] 19. Implement structural weight-diff metrics and incomplete-coverage warnings.
 - [ ] 20. Audit and document Milestone 0–4 acceptance evidence.
 
 ## Prompt template for each Codex session

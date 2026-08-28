@@ -97,6 +97,10 @@ JSON-ready heatmap evidence. Report generation, Markdown rendering, other
 metric reducers and the CLI remain planned work. A versioned data-only editor
 manifest and fail-closed normalized ROME and EasyEdit fixture importers are
 implemented; no upstream editor code or checkpoint is executed.
+Coverage-aware structural weight differences are also implemented for supplied
+tensor pairs, with Frobenius changes, optional spectral estimates, hash-linked
+raw evidence, and explicit missing-coverage warnings. Structural magnitude is
+not treated as proof of semantic harm or safety.
 
 ```powershell
 python -m pip install -e ".[dev]"

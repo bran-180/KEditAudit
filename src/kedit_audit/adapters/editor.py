@@ -11,7 +11,7 @@ from typing import Protocol, Self, TypeAlias, cast, runtime_checkable
 from urllib.parse import urlsplit
 
 from kedit_audit.adapters.model import ModelAdapter, validate_adapter_pair
-from kedit_audit.metrics import SequenceLogProbability
+from kedit_audit.metrics.behavioral import SequenceLogProbability
 
 EDITOR_ADAPTER_SCHEMA_VERSION = "1.0.0"
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")

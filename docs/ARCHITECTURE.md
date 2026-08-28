@@ -173,6 +173,14 @@ requires identical position and vocabulary dimensions. It imports no model
 library and is documented in
 [`METRICS.md`](METRICS.md#control-distribution-kl-divergence).
 
+The structural reducer joins caller-supplied flattened tensor pairs to the
+ordered changed-tensor inventory. It computes coverage-aware Frobenius changes
+and optional deterministic rank-two spectral estimates while retaining the
+artifact hashes and omitting tensor values. Missing tensors remain explicit
+and are never zero-filled. Structural evidence is descriptive and is not
+automatically interpreted as semantic harm. See
+[`METRICS.md`](METRICS.md#structural-weight-differences).
+
 ### `AuditReport`
 
 The report combines the manifest, case metadata, metric results, structural evidence, and limitations. JSON is authoritative; Markdown is a deterministic rendering of JSON.
