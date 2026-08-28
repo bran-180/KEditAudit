@@ -69,6 +69,7 @@ See:
 - [RunManifest and artifact hashing](docs/RUN_MANIFEST.md)
 - [MetricResult and AuditReport contracts](docs/AUDIT_REPORT.md)
 - [ModelAdapter contract and offline fake](docs/MODEL_ADAPTER.md)
+- [Editor artifact contract and lifecycle](docs/EDITOR_ADAPTER.md)
 - [Causal-tracing primitives](docs/CAUSAL_TRACING.md)
 - [Implemented metric definitions](docs/METRICS.md)
 - [Roadmap](docs/ROADMAP.md)
@@ -92,7 +93,8 @@ an offline clean/corrupt/restore coordinator, and a pinned GPT-2 activation
 adapter. The GPT-2 integration adds deterministic subject-embedding noise,
 restores clean subject states at verified transformer blocks, and emits ordered
 JSON-ready heatmap evidence. Report generation, Markdown rendering, other
-metric reducers, the CLI, and external editor adapters remain planned work.
+metric reducers, the CLI, and ROME/EasyEdit artifact importers remain planned
+work.
 
 ```powershell
 python -m pip install -e ".[dev]"

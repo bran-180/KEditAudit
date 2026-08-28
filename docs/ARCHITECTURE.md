@@ -95,6 +95,13 @@ Responsibilities:
 
 The core runner must not assume that an editor mutates a model in place.
 
+The generic data-only contract and `EditorArtifactSession` are implemented.
+Metadata records editor revision, source, architecture, state IDs, artifact
+hashes, and immutable JSON hyperparameters; changed-tensor entries retain
+hashes but no tensor values. Binding rejects a shared model root, and paired
+scoring evaluates baseline, edited, then baseline again so an observed
+in-place contamination fails closed. See [`EDITOR_ADAPTER.md`](EDITOR_ADAPTER.md).
+
 ### `AuditCase`
 
 A versioned data contract containing:
