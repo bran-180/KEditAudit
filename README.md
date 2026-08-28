@@ -5,8 +5,8 @@
 KEditAudit compares a baseline model with an edited model and produces a reproducible audit artifact. It focuses on what changed, what remained stable, and which claims the available evidence can or cannot support.
 
 This repository is currently a reviewed project blueprint and early Python
-package. It does **not** yet implement ROME, MEMIT, activation-level real-model
-causal tracing, or a safety certification system.
+package. It does **not** yet implement ROME, MEMIT, broad model-family support,
+or a safety certification system.
 
 ## Why this project
 
@@ -85,9 +85,11 @@ supplied logits. It also implements coverage-aware generality and locality
 reductions over paired probe scores. A deterministic `ModelAdapter` protocol,
 offline fake, and a pinned CPU/float32 `GPT2LMHeadModel` scoring adapter are
 available, together with safe module resolution, hook lifecycle management,
-and an offline clean/corrupt/restore coordinator. Report generation, Markdown
-rendering, other metric reducers, the CLI, external editor adapters, and real-
-model activation corruption/restoration remain planned work.
+an offline clean/corrupt/restore coordinator, and a pinned GPT-2 activation
+adapter. The GPT-2 integration adds deterministic subject-embedding noise,
+restores clean subject states at verified transformer blocks, and emits ordered
+JSON-ready heatmap evidence. Report generation, Markdown rendering, other
+metric reducers, the CLI, and external editor adapters remain planned work.
 
 ```powershell
 python -m pip install -e ".[dev]"

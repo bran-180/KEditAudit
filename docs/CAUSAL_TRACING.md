@@ -21,9 +21,9 @@ Cleanup is attempted on normal exit and on exceptions.
   preserved and the cleanup failure is attached as an exception note.
 - A closed manager cannot register or own additional hooks.
 
-The hook-manager tests use offline fake modules. The pinned GPT-2 adapter
-verifies real-model scoring and module resolution, but no Transformers hook
-integration or model-specific activation shape is claimed yet.
+The hook-manager tests use offline fake modules. A separate marked integration
+test exercises the same lifecycle against pinned GPT-2 embedding and block
+modules, including cleanup after a deliberately invalid restoration tensor.
 
 ## Clean/corrupt/restore coordinator
 
@@ -61,9 +61,33 @@ span, raw scores, reductions, and warnings. It deliberately excludes prompt
 text, activation tensors, and the corruption tensor. The primary experimental
 reference is [Locating and Editing Factual Associations in GPT / ROME](https://rome.baulab.info/).
 
-This coordinator remains an offline orchestration contract tested with a fake
-trace adapter. A pinned GPT-2 `ModelAdapter` can now tokenize, score, and expose
-modules, but it does not yet implement clean activation capture, activation
-corruption, or restoration. The project therefore does not yet establish that
-a restored real-model module semantically caused an answer or support a
-production causal-tracing architecture.
+## Pinned GPT-2 activation experiment
+
+`GPT2CausalTraceAdapter` connects the coordinator to the exact model and
+dependency versions documented in [`MODEL_ADAPTER.md`](MODEL_ADAPTER.md). Its
+supported intervention is deliberately narrow:
+
+- trace paths must resolve to exact GPT-2 blocks and have the form
+  `transformer.h.<index>`;
+- the clean run captures the block's primary hidden-state tensor;
+- a local CPU generator produces standard-normal float32 noise with fixed
+  standard deviation `1.0`, so corruption creation does not advance Torch's
+  global RNG state;
+- the same noise tensor is added only to the tokenizer-derived subject token
+  embeddings in the corrupted and every restoration run;
+- one restoration run replaces the corresponding subject positions at one
+  block with their detached clean hidden states;
+- target scores are target-sequence summed natural log-probabilities from the
+  existing authoritative reducer.
+
+The emitted heatmap artifact is the ordered `modules` array from
+`CausalTraceResult.as_dict()`. Each row retains the module path and raw clean,
+corrupted, and restored scores plus restoration delta and recovery fraction.
+It contains no prompt, target, subject text, activation, or corruption tensor.
+
+The integration fixture uses random tiny weights and an in-memory tokenizer;
+it is a mechanics and reproducibility test, not evidence about factual
+knowledge in public GPT-2 weights. Restoration scores can be negative, exceed
+the clean score, or fail to recover behavior. They must not be interpreted as
+proof that a block semantically caused an answer, that an edit is safe, or that
+the model has no hidden harmful behavior.

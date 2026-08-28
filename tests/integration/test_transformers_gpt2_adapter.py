@@ -13,10 +13,16 @@ tokenizers = pytest.importorskip("tokenizers")
 from kedit_audit.adapters import (
     SUPPORTED_TORCH_VERSION,
     SUPPORTED_TRANSFORMERS_VERSION,
+    AdapterCompatibilityError,
     GPT2CausalLMAdapter,
     ModelMetadata,
     TokenSpan,
     resolve_module_path,
+)
+from kedit_audit.causal import (
+    CausalTraceRequest,
+    GPT2CausalTraceAdapter,
+    run_causal_trace,
 )
 
 
@@ -99,3 +105,96 @@ def test_pinned_gpt2_adapter_scores_one_cpu_target_without_download() -> None:
     assert result.token_log_probabilities == pytest.approx((expected,))
     assert adapter.subject_token_span(prompt, "beta") == TokenSpan(1, 2)
     assert resolve_module_path(adapter.module_root, "transformer.h.0.mlp") is model.transformer.h[0].mlp
+
+
+def test_pinned_gpt2_trace_emits_deterministic_heatmap_data_and_cleans_hooks() -> None:
+    torch.manual_seed(17)
+    tokenizer = _tokenizer()
+    config = transformers.GPT2Config(
+        vocab_size=len(tokenizer),
+        n_positions=16,
+        n_ctx=16,
+        n_embd=8,
+        n_layer=2,
+        n_head=2,
+        bos_token_id=0,
+        eos_token_id=0,
+    )
+    model = transformers.GPT2LMHeadModel(config).to(device="cpu", dtype=torch.float32)
+    adapter = GPT2CausalTraceAdapter(
+        model=model,
+        tokenizer=tokenizer,
+        metadata=ModelMetadata(
+            model_id="local/tiny-random-gpt2",
+            model_revision="local-config-v1",
+            tokenizer_id="local/word-level-fast",
+            tokenizer_revision="local-vocab-v1",
+            state_id="baseline-local-gpt2",
+            state_kind="baseline",
+            device="cpu",
+            dtype="float32",
+        ),
+    )
+    prompt = "alpha beta gamma"
+    target = " delta"
+    module_paths = ("transformer.h.0", "transformer.h.1")
+    request = CausalTraceRequest(
+        prompt=prompt,
+        subject="beta",
+        target=target,
+        module_paths=module_paths,
+        seed=23,
+    )
+    embedding = model.transformer.wte
+    traced_modules = tuple(resolve_module_path(model, path) for path in module_paths)
+
+    first = run_causal_trace(adapter, request)
+    second = run_causal_trace(adapter, request)
+    artifact = first.as_dict()
+
+    assert first == second
+    assert first.clean_target_score == pytest.approx(
+        adapter.score_target(prompt, target).sum_log_probability
+    )
+    assert first.corrupted_target_score != pytest.approx(first.clean_target_score)
+    assert first.subject_token_span == TokenSpan(1, 2)
+    assert [row["module_path"] for row in artifact["modules"]] == list(module_paths)
+    assert "alpha" not in repr(artifact)
+    assert "beta" not in repr(artifact)
+    assert "gamma" not in repr(artifact)
+    for evidence in first.modules:
+        assert evidence.restoration_delta == pytest.approx(
+            evidence.restored_target_score - first.corrupted_target_score
+        )
+        assert evidence.recovery_fraction == pytest.approx(
+            evidence.restoration_delta
+            / (first.clean_target_score - first.corrupted_target_score)
+        )
+    assert not embedding._forward_hooks
+    assert all(not module._forward_hooks for module in traced_modules)
+
+    prompt_ids = adapter.tokenize(prompt)
+    span = adapter.subject_token_span(prompt, "beta")
+    random_state = torch.random.get_rng_state()
+    corruption = adapter.create_corruption(
+        prompt_token_ids=prompt_ids,
+        subject_span=span,
+        seed=23,
+    )
+    assert torch.equal(torch.random.get_rng_state(), random_state)
+    assert adapter.run_corrupted(
+        prompt=prompt,
+        target=target,
+        corruption=corruption,
+    ) == pytest.approx(first.corrupted_target_score)
+
+    with pytest.raises(AdapterCompatibilityError, match="clean activation shape"):
+        adapter.run_restored(
+            prompt=prompt,
+            target=target,
+            corruption=corruption,
+            module_path="transformer.h.0",
+            clean_activation=torch.zeros((1, 1, 1), dtype=torch.float32),
+        )
+    assert not embedding._forward_hooks
+    assert all(not module._forward_hooks for module in traced_modules)

@@ -13,6 +13,7 @@ from kedit_audit.adapters import (
     ModelMetadata,
     TokenSpan,
 )
+from kedit_audit.causal import GPT2CausalTraceAdapter
 
 
 @dataclass
@@ -209,3 +210,18 @@ def test_tokenization_rejects_oversized_untrusted_text() -> None:
 
     with pytest.raises(ValueError, match="4096 characters"):
         adapter.tokenize("x" * 4097)
+
+
+def test_trace_adapter_rejects_non_block_path_before_loading_torch() -> None:
+    adapter = GPT2CausalTraceAdapter(
+        model=GPT2LMHeadModel(),
+        tokenizer=FakeFastTokenizer(),
+        metadata=_metadata(),
+    )
+
+    with pytest.raises(AdapterCompatibilityError, match="transformer.h.<index>"):
+        adapter.run_clean(
+            prompt="alpha beta",
+            target=" gamma",
+            module_paths=("transformer.h.0.mlp",),
+        )

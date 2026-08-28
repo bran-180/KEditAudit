@@ -1,5 +1,9 @@
 """Deterministic causal-analysis primitives with explicit lifecycle control."""
 
+from kedit_audit.causal.gpt2 import (
+    GPT2_CORRUPTION_STANDARD_DEVIATION,
+    GPT2CausalTraceAdapter,
+)
 from kedit_audit.causal.hooks import (
     ForwardHook,
     ForwardHookModule,
@@ -21,12 +25,14 @@ from kedit_audit.causal.tracer import (
 
 __all__ = [
     "CAUSAL_TRACE_RESULT_VERSION",
+    "GPT2_CORRUPTION_STANDARD_DEVIATION",
     "CausalTraceAdapter",
     "CausalTraceRequest",
     "CausalTraceResult",
     "CleanTraceRun",
     "ForwardHook",
     "ForwardHookModule",
+    "GPT2CausalTraceAdapter",
     "HookCleanupError",
     "HookManager",
     "HookRegistrationError",

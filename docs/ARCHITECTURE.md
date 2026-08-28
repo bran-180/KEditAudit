@@ -205,14 +205,16 @@ The clean/corrupt/restore coordinator validates module paths before execution,
 derives the subject span through the adapter tokenizer, creates one corruption
 object, and reuses that exact object for the corrupted and all restoration
 runs. Its versioned JSON-ready evidence retains raw scores and recovery
-reductions without serializing prompts or tensors. This is an offline fake-
-adapter prototype, not a pinned Transformers integration.
+reductions without serializing prompts or tensors. The coordinator remains
+covered by dependency-free fake-adapter tests.
 
-The pinned GPT-2 adapter now supplies real-model tokenization, target scoring,
-and a verified module root. It does not yet implement the activation capture,
-corruption, and restoration operations required by the tracing coordinator, so
-the fake-adapter tracing result must not be described as real-model causal
-evidence.
+`GPT2CausalTraceAdapter` supplies the pinned real-model integration. It captures
+detached outputs from exact `transformer.h.<index>` GPT-2 blocks, creates unit-
+standard-deviation Gaussian noise with a local seeded CPU generator, adds that
+fixed tensor only to the tokenizer-derived subject embedding span, and restores
+the corresponding clean subject states at one block per comparison. Hook
+ownership remains scoped to one model call. These diagnostic interventions do
+not establish semantic causality or model safety.
 
 ## 6. Testing strategy
 
@@ -238,7 +240,9 @@ Use toy tensors and a tiny local `nn.Module` to test:
 
 The GPT-2 integration is marked `integration`, runs on CPU with one Torch
 intra-op thread, builds random weights and a local tokenizer in memory, and
-performs no model download.
+performs no model download. It exercises scoring, two real block restorations,
+deterministic heatmap evidence, local RNG isolation, and hook cleanup after an
+intentional restoration error.
 
 ## 7. Optional OpenAI integration
 

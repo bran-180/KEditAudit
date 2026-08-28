@@ -129,7 +129,7 @@ Acceptance:
 - [x] 9. Implement a deterministic `HookManager` and cleanup tests.
 - [x] 10. Implement clean/corrupt/restore tracing with one fixed corruption tensor.
 - [x] 11. Build a pinned GPT-2 `ModelAdapter` and local CPU integration test.
-- [ ] 12. Connect GPT-2 activations to clean/corrupt/restore tracing and emit heatmap data.
+- [x] 12. Connect GPT-2 activations to clean/corrupt/restore tracing and emit heatmap data.
 
 ## Prompt template for each Codex session
 

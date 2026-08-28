@@ -77,6 +77,10 @@ The integration fixture creates a two-layer random GPT-2 and word-level fast
 tokenizer entirely in memory. It verifies CPU scoring against an independent
 Torch log-softmax calculation, offset-derived subject alignment, and the
 `transformer.h.0.mlp` numeric module path without downloading a checkpoint.
+Issue 12 adds a separate `GPT2CausalTraceAdapter` subclass for activation
+experiments. Its exact corruption and restoration contract is documented in
+[`CAUSAL_TRACING.md`](CAUSAL_TRACING.md); the base scorer remains usable without
+requesting activation tracing.
 
 ```powershell
 python -m pip install -e ".[dev,ml]"
@@ -88,7 +92,8 @@ This slice follows the official
 and the pinned
 [Transformers v5.16.1 release](https://github.com/huggingface/transformers/releases/tag/v5.16.1).
 It does not load public GPT-2 weights, support GPU or reduced precision, audit
-an edited checkpoint, or implement activation corruption/restoration.
+an edited checkpoint, or generalize activation tracing beyond verified GPT-2
+block outputs.
 
 ## Safe module-path resolution
 
