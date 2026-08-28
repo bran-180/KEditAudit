@@ -20,6 +20,7 @@ METRIC_RESULT_SCHEMA_VERSION = "1.0.0"
 AUDIT_REPORT_SCHEMA_VERSION = "1.0.0"
 EDITOR_ARTIFACT_SCHEMA_VERSION = "1.0.0"
 RIPPLE_CASE_SCHEMA_VERSION = "1.0.0"
+REPORT_COMPARISON_SCHEMA_VERSION = "1.0.0"
 _PROBE_GROUPS = ("exact", "paraphrase", "locality", "portability", "control")
 _RIPPLE_GROUPS = (
     "relation_specificity",
@@ -108,6 +109,17 @@ class RippleCaseValidationError(ValueError):
         super().__init__(f"RippleCase validation failed:\n{details}")
 
 
+class ReportComparisonValidationError(ValueError):
+    """Raised when a ReportComparison violates its versioned contract."""
+
+    def __init__(self, issues: Sequence[ValidationIssue]) -> None:
+        if not issues:
+            raise ValueError("ReportComparisonValidationError requires at least one issue")
+        self.issues = tuple(issues)
+        details = "\n".join(f"- {issue}" for issue in self.issues)
+        super().__init__(f"ReportComparison validation failed:\n{details}")
+
+
 def load_audit_case_schema() -> dict[str, Any]:
     """Return the packaged AuditCase schema as a new dictionary."""
 
@@ -142,6 +154,12 @@ def load_ripple_case_schema() -> dict[str, Any]:
     """Return the packaged RippleCase schema as a new dictionary."""
 
     return _load_schema("ripple_case.schema.json")
+
+
+def load_report_comparison_schema() -> dict[str, Any]:
+    """Return the packaged ReportComparison schema as a new dictionary."""
+
+    return _load_schema("report_comparison.schema.json")
 
 
 def validate_audit_case(instance: object) -> None:
@@ -200,6 +218,15 @@ def validate_ripple_case(instance: object) -> None:
     issues.extend(_ripple_case_semantic_issues(instance))
     if issues:
         raise RippleCaseValidationError(issues)
+
+
+def validate_report_comparison(instance: object) -> None:
+    """Validate a report comparison and its metric-row consistency."""
+
+    issues = _schema_issues(load_report_comparison_schema(), instance)
+    issues.extend(_report_comparison_semantic_issues(instance))
+    if issues:
+        raise ReportComparisonValidationError(issues)
 
 
 def _load_schema(resource_name: str) -> dict[str, Any]:
@@ -848,6 +875,109 @@ def _is_array(value: object) -> TypeGuard[Sequence[object]]:
 
 def _is_integer(value: object) -> TypeGuard[int]:
     return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _report_comparison_semantic_issues(instance: object) -> list[ValidationIssue]:
+    if not isinstance(instance, Mapping):
+        return []
+    issues = _non_finite_number_issues(instance)
+    metrics = instance.get("metrics")
+    if not _is_array(metrics):
+        return issues
+
+    first_index_by_id: dict[str, int] = {}
+    for index, metric in enumerate(metrics):
+        if not isinstance(metric, Mapping):
+            continue
+        metric_id = metric.get("metric_id")
+        if isinstance(metric_id, str):
+            first_index = first_index_by_id.setdefault(metric_id, index)
+            if first_index != index:
+                issues.append(
+                    ValidationIssue(
+                        f"$.metrics[{index}].metric_id",
+                        f"duplicates metrics[{first_index}].metric_id",
+                    )
+                )
+
+        presence = metric.get("presence")
+        snapshot_a = metric.get("report_a")
+        snapshot_b = metric.get("report_b")
+        expected_presence = (
+            {
+                "both": (True, True),
+                "only-a": (True, False),
+                "only-b": (False, True),
+            }.get(presence)
+            if isinstance(presence, str)
+            else None
+        )
+        if expected_presence is not None:
+            actual_presence = (
+                isinstance(snapshot_a, Mapping),
+                isinstance(snapshot_b, Mapping),
+            )
+            if actual_presence != expected_presence:
+                issues.append(
+                    ValidationIssue(
+                        f"$.metrics[{index}].presence",
+                        "must agree with report_a and report_b snapshot availability",
+                    )
+                )
+
+        comparable = metric.get("comparable")
+        delta = metric.get("aggregate_delta_b_minus_a")
+        if comparable is False and delta is not None:
+            issues.append(
+                ValidationIssue(
+                    f"$.metrics[{index}].aggregate_delta_b_minus_a",
+                    "must be null when comparable is false",
+                )
+            )
+        if comparable is True:
+            if presence != "both":
+                issues.append(
+                    ValidationIssue(
+                        f"$.metrics[{index}].comparable",
+                        "can be true only when presence is 'both'",
+                    )
+                )
+            aggregate_a = (
+                snapshot_a.get("aggregate") if isinstance(snapshot_a, Mapping) else None
+            )
+            aggregate_b = (
+                snapshot_b.get("aggregate") if isinstance(snapshot_b, Mapping) else None
+            )
+            if _is_number(aggregate_a) and _is_number(aggregate_b):
+                expected_delta = float(aggregate_b) - float(aggregate_a)
+                if not math.isfinite(expected_delta):
+                    if delta is not None:
+                        issues.append(
+                            ValidationIssue(
+                                f"$.metrics[{index}].aggregate_delta_b_minus_a",
+                                "must be null when the subtraction is outside the finite range",
+                            )
+                        )
+                elif not _is_number(delta) or not math.isclose(
+                    float(delta),
+                    expected_delta,
+                    rel_tol=0.0,
+                    abs_tol=1e-12,
+                ):
+                    issues.append(
+                        ValidationIssue(
+                            f"$.metrics[{index}].aggregate_delta_b_minus_a",
+                            "must equal report_b.aggregate - report_a.aggregate",
+                        )
+                    )
+            elif delta is not None:
+                issues.append(
+                    ValidationIssue(
+                        f"$.metrics[{index}].aggregate_delta_b_minus_a",
+                        "must be null when either aggregate is unavailable",
+                    )
+                )
+    return issues
 
 
 def _is_number(value: object) -> TypeGuard[int | float]:

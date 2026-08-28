@@ -78,3 +78,6 @@ The deterministic completed fixture is
 [`tests/fixtures/audit_reports/valid/completed.json`](../tests/fixtures/audit_reports/valid/completed.json).
 Its KEditAudit canonical JSON v1 representation is 4,354 bytes with SHA-256
 `67bb4e1adbc3e0e321e44fa25536c760549519ca6ad16efc68a54c52a778bf6b`.
+
+Compatible reports can be compared with the versioned, descriptive-only
+contract documented in [`REPORT_COMPARISON.md`](REPORT_COMPARISON.md).

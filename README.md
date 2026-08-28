@@ -87,6 +87,7 @@ See:
 - [Command-line interface](docs/CLI.md)
 - [Audit runner state contract](docs/AUDIT_RUNNER.md)
 - [JSON and Markdown reporting](docs/REPORTING.md)
+- [AuditReport comparison](docs/REPORT_COMPARISON.md)
 
 ## Development status
 

@@ -218,6 +218,12 @@ exclude the exception message and traceback while the raised error retains the
 local exception chain. It does not load models or claim end-to-end CLI support;
 see [`AUDIT_RUNNER.md`](AUDIT_RUNNER.md).
 
+The report comparator validates both complete source contracts, requires the
+same case, baseline, model/tokenizer, numeric environment, generation, and seed
+context, then emits hash-linked `report_b - report_a` aggregate rows. Missing or
+contract-incompatible metrics remain explicit and receive no numeric delta or
+automatic conclusion. See [`REPORT_COMPARISON.md`](REPORT_COMPARISON.md).
+
 ## 4. Reproducibility manifest
 
 Version `1.0.0` is implemented as a Draft 2020-12 JSON Schema and documented in

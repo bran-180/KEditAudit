@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kedit-audit:schema:report-comparison:1.0.0",
+  "title": "KEditAudit ReportComparison",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report_a",
+    "report_b",
+    "comparability",
+    "metrics",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "report_a": { "$ref": "#/$defs/reportReference" },
+    "report_b": { "$ref": "#/$defs/reportReference" },
+    "comparability": { "$ref": "#/$defs/comparability" },
+    "metrics": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": { "$ref": "#/$defs/metricComparison" }
+    },
+    "warnings": { "$ref": "#/$defs/warnings" }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "contentHash": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "encoding", "digest", "size_bytes"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "encoding": { "const": "kedit-audit-canonical-json-v1" },
+        "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "size_bytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "reportReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["report_id", "content_hash"],
+      "properties": {
+        "report_id": { "$ref": "#/$defs/identifier" },
+        "content_hash": { "$ref": "#/$defs/contentHash" }
+      }
+    },
+    "comparability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "audit_case_sha256",
+        "baseline_sha256",
+        "model_id",
+        "model_revision",
+        "tokenizer_id",
+        "tokenizer_revision",
+        "device",
+        "dtype"
+      ],
+      "properties": {
+        "audit_case_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "baseline_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "model_id": { "type": "string", "minLength": 1, "maxLength": 32768 },
+        "model_revision": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "tokenizer_id": { "type": "string", "minLength": 1, "maxLength": 32768 },
+        "tokenizer_revision": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "device": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "dtype": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    "metricSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "aggregate", "coverage"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["complete", "incomplete", "failed"]
+        },
+        "aggregate": {
+          "oneOf": [{ "type": "number" }, { "type": "null" }]
+        },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "metricComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metric_id",
+        "presence",
+        "comparable",
+        "unit",
+        "direction",
+        "reduction",
+        "report_a",
+        "report_b",
+        "aggregate_delta_b_minus_a",
+        "warnings"
+      ],
+      "properties": {
+        "metric_id": { "$ref": "#/$defs/identifier" },
+        "presence": {
+          "type": "string",
+          "enum": ["both", "only-a", "only-b"]
+        },
+        "comparable": { "type": "boolean" },
+        "unit": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 128 },
+            { "type": "null" }
+          ]
+        },
+        "direction": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["higher-is-better", "lower-is-better", "descriptive-only"]
+            },
+            { "type": "null" }
+          ]
+        },
+        "reduction": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 512 },
+            { "type": "null" }
+          ]
+        },
+        "report_a": {
+          "oneOf": [{ "$ref": "#/$defs/metricSnapshot" }, { "type": "null" }]
+        },
+        "report_b": {
+          "oneOf": [{ "$ref": "#/$defs/metricSnapshot" }, { "type": "null" }]
+        },
+        "aggregate_delta_b_minus_a": {
+          "oneOf": [{ "type": "number" }, { "type": "null" }]
+        },
+        "warnings": { "$ref": "#/$defs/warnings" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "maxItems": 1000,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 4096 }
+    }
+  }
+}

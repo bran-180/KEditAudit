@@ -141,7 +141,7 @@ Acceptance:
 - [x] 21. Add a dependency-light CLI skeleton and safe `validate-case` command.
 - [x] 22. Implement the audit runner state machine and persistent failure manifest.
 - [x] 23. Write validated JSON reports and escaped deterministic Markdown.
-- [ ] 24. Compare two compatible validated reports without automatic conclusions.
+- [x] 24. Compare two compatible validated reports without automatic conclusions.
 - [ ] 25. Complete Milestone 5 end-to-end, security, and acceptance validation.
 
 ## Prompt template for each Codex session

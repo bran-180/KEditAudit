@@ -12,9 +12,11 @@ from typing import NoReturn, TextIO, cast
 from kedit_audit.artifacts import (
     AuditCaseValidationError,
     JsonInputError,
+    canonical_json_bytes,
     load_json_document,
     validate_audit_case,
 )
+from kedit_audit.reporting import ReportComparisonError, compare_audit_reports
 
 CommandHandler = Callable[[argparse.Namespace, TextIO, TextIO], int]
 
@@ -51,7 +53,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     compare_parser.add_argument("report_a", type=Path)
     compare_parser.add_argument("report_b", type=Path)
-    compare_parser.set_defaults(handler=_planned_command)
+    compare_parser.set_defaults(handler=_compare_command)
     return parser
 
 
@@ -111,6 +113,29 @@ def _planned_command(
 ) -> int:
     print("error: this command is not implemented in Issue 21", file=stderr)
     return 2
+
+
+def _compare_command(
+    arguments: argparse.Namespace,
+    stdout: TextIO,
+    stderr: TextIO,
+) -> int:
+    try:
+        report_a = load_json_document(cast(Path, arguments.report_a))
+        report_b = load_json_document(cast(Path, arguments.report_b))
+    except JsonInputError:
+        print("error: a report input is not a valid bounded JSON document", file=stderr)
+        return 2
+    try:
+        comparison = compare_audit_reports(
+            cast(dict[str, object], report_a),
+            cast(dict[str, object], report_b),
+        )
+    except ReportComparisonError as error:
+        print(f"error: {error}", file=stderr)
+        return 2
+    print(canonical_json_bytes(comparison.as_dict()).decode("utf-8"), file=stdout)
+    return 0
 
 
 def _safe_validation_message(message: str) -> str:

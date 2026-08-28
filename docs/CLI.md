@@ -1,13 +1,14 @@
 # Command-line interface
 
-Status: Issue 21 implements the dependency-light command parser and
-`validate-case`. The `audit` and `compare` names are reserved by the parser but
-remain unavailable until their issue-scoped implementations land.
+Status: `validate-case` and `compare` are implemented. The `audit` name is
+reserved by the parser but remains unavailable until Issue 25 connects the
+runner, adapters, and report writer.
 
 ```powershell
 kedit-audit --help
 kedit-audit validate-case path\to\case.json
 python -m kedit_audit validate-case path\to\case.json
+kedit-audit compare report-a.json report-b.json
 ```
 
 The CLI uses `argparse` from the Python standard library, so help and case
@@ -20,3 +21,9 @@ A successful command prints only the schema version, public case ID, and
 avoiding the input value in the error output; prompts and targets are not
 echoed. Exit code `0` means valid and exit code `2` means the file could not be
 read or did not satisfy the contract.
+
+`compare` validates both reports, requires matching case, baseline, model,
+tokenizer, device, dtype, quantization, generation, and seed context, then
+prints a versioned comparison JSON artifact to stdout. Aggregate deltas are
+always `report_b - report_a`; no automatic improvement, regression, harm, or
+safety conclusion is emitted.
