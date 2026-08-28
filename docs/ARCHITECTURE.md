@@ -11,6 +11,7 @@ kedit-audit/
 │   ├── ARCHITECTURE.md
 │   ├── AUDIT_CASE.md
 │   ├── AUDIT_REPORT.md
+│   ├── CAUSAL_TRACING.md
 │   ├── GEMINI_REVIEW.md
 │   ├── KNOWLEDGE_BASE.md
 │   ├── METRICS.md
@@ -193,6 +194,11 @@ Record:
 - Reuse corruption tensors in paired causal-tracing experiments.
 - Do not compare results generated with different tokenizers or incompatible generation settings.
 - Make tolerances explicit for CPU/GPU and dtype-dependent differences.
+
+The implemented `HookManager` owns forward hooks, cleans them in reverse order
+on normal and exceptional exits, preserves an original model exception if
+cleanup also fails, and never coerces hook outputs. Its offline contract and
+limitations are documented in [`CAUSAL_TRACING.md`](CAUSAL_TRACING.md).
 
 ## 6. Testing strategy
 

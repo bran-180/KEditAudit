@@ -126,7 +126,7 @@ Acceptance:
 - [x] 6. Implement `AuditReport` round-trip validation.
 - [x] 7. Build a toy-model `ModelAdapter` protocol and fake adapter.
 - [x] 8. Implement and test numeric module-path resolution.
-- [ ] 9. Implement a deterministic `HookManager` and cleanup tests.
+- [x] 9. Implement a deterministic `HookManager` and cleanup tests.
 - [ ] 10. Implement clean/corrupt/restore tracing with one fixed corruption tensor.
 
 ## Prompt template for each Codex session

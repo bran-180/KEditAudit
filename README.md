@@ -67,6 +67,7 @@ See:
 - [RunManifest and artifact hashing](docs/RUN_MANIFEST.md)
 - [MetricResult and AuditReport contracts](docs/AUDIT_REPORT.md)
 - [ModelAdapter contract and offline fake](docs/MODEL_ADAPTER.md)
+- [Causal-tracing primitives](docs/CAUSAL_TRACING.md)
 - [Implemented metric definitions](docs/METRICS.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Review of the Gemini draft](docs/GEMINI_REVIEW.md)
