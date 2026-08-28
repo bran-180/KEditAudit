@@ -210,6 +210,13 @@ validate case
 
 If any mandatory probe fails, the report must show an incomplete state rather than silently dropping the probe.
 
+The implemented manifest-first runner accepts an already validated `running`
+manifest and a caller-owned evaluation callback. It atomically persists the
+running state, then a completed or failed terminal state. Failure manifests
+exclude the exception message and traceback while the raised error retains the
+local exception chain. It does not load models or claim end-to-end CLI support;
+see [`AUDIT_RUNNER.md`](AUDIT_RUNNER.md).
+
 ## 4. Reproducibility manifest
 
 Version `1.0.0` is implemented as a Draft 2020-12 JSON Schema and documented in
