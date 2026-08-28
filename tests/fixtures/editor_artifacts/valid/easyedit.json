@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "synthetic-easyedit-contract-v1",
+  "artifact_kind": "synthetic-contract-fixture",
+  "editor": {
+    "name": "EasyEdit",
+    "revision": "14cea8245f06715684592ab55184939b99d70784",
+    "source_repository": "https://github.com/zjunlp/EasyEdit",
+    "hyperparameters": {
+      "algorithm": "ROME",
+      "model_name": "synthetic-local-gpt2",
+      "sequential_edit": false,
+      "return_orig_weights": true,
+      "fixture_notice": "Synthetic contract values; not an official model result."
+    }
+  },
+  "model": {
+    "architecture": "GPT2LMHeadModel",
+    "baseline": {
+      "state_id": "baseline-easyedit-fixture",
+      "artifact_sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    "edited": {
+      "state_id": "edited-easyedit-fixture",
+      "artifact_sha256": "6666666666666666666666666666666666666666666666666666666666666666"
+    }
+  },
+  "changed_tensors": [
+    {
+      "name": "transformer.h.0.mlp.c_proj.weight",
+      "shape": [8, 8],
+      "dtype": "float32",
+      "device": "cpu",
+      "baseline_sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+      "edited_sha256": "8888888888888888888888888888888888888888888888888888888888888888"
+    }
+  ]
+}

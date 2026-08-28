@@ -1,5 +1,9 @@
 """Editor-independent model adapter contracts and offline test doubles."""
 
+from kedit_audit.adapters.easyedit import (
+    EASYEDIT_SOURCE_REPOSITORY,
+    EasyEditArtifactAdapter,
+)
 from kedit_audit.adapters.editor import (
     EDITOR_ADAPTER_SCHEMA_VERSION,
     BaselineContaminationError,
@@ -31,6 +35,7 @@ from kedit_audit.adapters.transformers import (
 )
 
 __all__ = [
+    "EASYEDIT_SOURCE_REPOSITORY",
     "EDITOR_ADAPTER_SCHEMA_VERSION",
     "ROME_SOURCE_REPOSITORY",
     "SUPPORTED_TORCH_VERSION",
@@ -40,6 +45,7 @@ __all__ = [
     "AdapterPairValidationError",
     "BaselineContaminationError",
     "ChangedTensorRecord",
+    "EasyEditArtifactAdapter",
     "EditorAdapterMetadata",
     "EditorArtifactAdapter",
     "EditorArtifactSession",

@@ -109,6 +109,12 @@ architecture, and distinct preloaded roots without importing or executing the
 ROME package. The current fixture is synthetic contract evidence, not a real
 edited checkpoint.
 
+`EasyEditArtifactAdapter` applies the same data-only boundary to a recorded
+parameter-edit export. It requires the official source identity, exact revision,
+algorithm/lifecycle hyperparameters, original-weight retention, a non-empty
+changed-tensor inventory, and exact supported GPT-2 roots. No EasyEdit package
+or external model is imported by default tests.
+
 ### `AuditCase`
 
 A versioned data contract containing:
@@ -255,7 +261,7 @@ Use toy tensors and a tiny local `nn.Module` to test:
 
 - one in-memory two-layer GPT-2 under pinned Torch/Transformers versions;
 - one pinned normalized ROME contract fixture;
-- one EasyEdit adapter fixture;
+- one pinned normalized EasyEdit contract fixture;
 - no large model in default CI;
 - downloaded-model tests opt in and cache by revision.
 

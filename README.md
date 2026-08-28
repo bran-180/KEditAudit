@@ -93,10 +93,9 @@ an offline clean/corrupt/restore coordinator, and a pinned GPT-2 activation
 adapter. The GPT-2 integration adds deterministic subject-embedding noise,
 restores clean subject states at verified transformer blocks, and emits ordered
 JSON-ready heatmap evidence. Report generation, Markdown rendering, other
-metric reducers, the CLI, and the EasyEdit artifact importer remain planned
-work. A versioned data-only editor manifest and fail-closed normalized ROME
-fixture importer are implemented; no upstream editor code or checkpoint is
-executed.
+metric reducers and the CLI remain planned work. A versioned data-only editor
+manifest and fail-closed normalized ROME and EasyEdit fixture importers are
+implemented; no upstream editor code or checkpoint is executed.
 
 ```powershell
 python -m pip install -e ".[dev]"

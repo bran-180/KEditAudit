@@ -1,7 +1,7 @@
 # Editor artifact contract and model-state lifecycle
 
-Status: generic data-only contract and ROME normalized-manifest importer
-implemented; the EasyEdit importer is developed in Issue 17.
+Status: generic data-only contract plus normalized ROME and EasyEdit manifest
+importers implemented.
 
 KEditAudit does not own an editing algorithm. `EditorArtifactAdapter` binds
 provenance and a changed-tensor inventory to baseline and edited
@@ -89,3 +89,27 @@ pins official repository revision
 `0874014cd9837e4365f3e6f3c71400ef11509e04` solely to test provenance and
 fail-closed behavior. It is not evidence that KEditAudit reproduced an official
 ROME edit or supports GPT-2 XL execution.
+
+## EasyEdit normalized-manifest importer
+
+`EasyEditArtifactAdapter` accepts only:
+
+- `editor.name` equal to `EasyEdit`;
+- the official repository URL `https://github.com/zjunlp/EasyEdit`;
+- an explicit 40-character producing revision;
+- `GPT2LMHeadModel` metadata and exact pinned Transformers GPT-2 roots when
+  states are bound;
+- a recorded non-blank `algorithm`, boolean `sequential_edit`, and
+  `return_orig_weights: true`;
+- at least one changed-tensor inventory entry.
+
+This narrow importer targets EasyEdit's documented parameter-edit interface,
+where an edited model can be returned with a `weights_copy` of original values.
+It does not cover in-context methods with no changed weights, steering-only
+EasyEdit 2 flows, every EasyEdit algorithm, or arbitrary model architectures.
+
+The committed EasyEdit fixture is synthetic and pins official repository
+revision `14cea8245f06715684592ab55184939b99d70784` for provenance tests. No
+EasyEdit source, model, prompt, output, or weight value is copied or executed.
+The changed-tensor inventory preserves only KEditAudit-authored names, shapes,
+metadata, and synthetic hashes.

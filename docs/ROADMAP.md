@@ -134,7 +134,7 @@ Acceptance:
 - [x] 14. Implement supplied-logits KL control divergence with raw evidence retention.
 - [x] 15. Define the editor-artifact contract and contamination-detecting lifecycle.
 - [x] 16. Import a pinned ROME result manifest without executing upstream code.
-- [ ] 17. Import a pinned EasyEdit result manifest and retain changed-tensor inventory.
+- [x] 17. Import a pinned EasyEdit result manifest and retain changed-tensor inventory.
 - [ ] 18. Define and validate a versioned portability/ripple case format.
 - [ ] 19. Implement structural weight-diff metrics and incomplete-coverage warnings.
 - [ ] 20. Audit and document Milestone 0–4 acceptance evidence.
