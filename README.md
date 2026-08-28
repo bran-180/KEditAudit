@@ -75,6 +75,8 @@ See:
 - [Review of the Gemini draft](docs/GEMINI_REVIEW.md)
 - [Codex for OSS application draft](docs/OSS_APPLICATION_DRAFT.md)
 - [Name, license, and citation decision](docs/NAME_AND_CITATION.md)
+- [Threat model](docs/THREAT_MODEL.md)
+- [Sources and license inventory](docs/SOURCES_AND_LICENSES.md)
 
 ## Development status
 

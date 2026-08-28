@@ -130,6 +130,14 @@ Acceptance:
 - [x] 10. Implement clean/corrupt/restore tracing with one fixed corruption tensor.
 - [x] 11. Build a pinned GPT-2 `ModelAdapter` and local CPU integration test.
 - [x] 12. Connect GPT-2 activations to clean/corrupt/restore tracing and emit heatmap data.
+- [x] 13. Complete the threat model and source/dataset-license inventory.
+- [ ] 14. Implement supplied-logits KL control divergence with raw evidence retention.
+- [ ] 15. Define the editor-artifact contract and contamination-detecting lifecycle.
+- [ ] 16. Import a pinned ROME result manifest without executing upstream code.
+- [ ] 17. Import a pinned EasyEdit result manifest and retain changed-tensor inventory.
+- [ ] 18. Define and validate a versioned portability/ripple case format.
+- [ ] 19. Implement structural weight-diff metrics and incomplete-coverage warnings.
+- [ ] 20. Audit and document Milestone 0–4 acceptance evidence.
 
 ## Prompt template for each Codex session
 

@@ -34,3 +34,32 @@ def test_repository_contains_complete_apache_license() -> None:
     assert "Version 2.0, January 2004" in license_text
     assert "TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION" in license_text
     assert "END OF TERMS AND CONDITIONS" in license_text
+
+
+def test_governance_docs_cover_required_threats_and_license_decisions() -> None:
+    threat_model = (PROJECT_ROOT / "docs" / "THREAT_MODEL.md").read_text(encoding="utf-8")
+    inventory = (PROJECT_ROOT / "docs" / "SOURCES_AND_LICENSES.md").read_text(
+        encoding="utf-8"
+    )
+
+    for required_surface in (
+        "Checkpoints",
+        "Remote code",
+        "Prompts and outputs",
+        "Editor artifacts",
+        "Baseline state",
+        "Dataset records",
+        "Reports",
+        "Optional APIs",
+    ):
+        assert required_surface in threat_model
+
+    for required_source in (
+        "github.com/kmeng01/rome",
+        "github.com/zjunlp/EasyEdit",
+        "github.com/edenbiran/RippleEdits",
+        "10.1214/aoms/1177729694",
+        "CounterFact",
+        "unknown license",
+    ):
+        assert required_source in inventory
