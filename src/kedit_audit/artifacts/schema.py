@@ -15,6 +15,7 @@ from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
 AUDIT_CASE_SCHEMA_VERSION = "1.0.0"
+AUDIT_SNAPSHOT_SCHEMA_VERSION = "1.0.0"
 RUN_MANIFEST_SCHEMA_VERSION = "1.0.0"
 METRIC_RESULT_SCHEMA_VERSION = "1.0.0"
 AUDIT_REPORT_SCHEMA_VERSION = "1.0.0"
@@ -52,6 +53,17 @@ class AuditCaseValidationError(ValueError):
         self.issues = tuple(issues)
         details = "\n".join(f"- {issue}" for issue in self.issues)
         super().__init__(f"AuditCase validation failed:\n{details}")
+
+
+class AuditSnapshotValidationError(ValueError):
+    """Raised when an AuditSnapshot violates its data-only input contract."""
+
+    def __init__(self, issues: Sequence[ValidationIssue]) -> None:
+        if not issues:
+            raise ValueError("AuditSnapshotValidationError requires at least one issue")
+        self.issues = tuple(issues)
+        details = "\n".join(f"- {issue}" for issue in self.issues)
+        super().__init__(f"AuditSnapshot validation failed:\n{details}")
 
 
 class RunManifestValidationError(ValueError):
@@ -126,6 +138,12 @@ def load_audit_case_schema() -> dict[str, Any]:
     return _load_schema("audit_case.schema.json")
 
 
+def load_audit_snapshot_schema() -> dict[str, Any]:
+    """Return the packaged AuditSnapshot schema as a new dictionary."""
+
+    return _load_schema("audit_snapshot.schema.json")
+
+
 def load_run_manifest_schema() -> dict[str, Any]:
     """Return the packaged RunManifest schema as a new dictionary."""
 
@@ -169,6 +187,19 @@ def validate_audit_case(instance: object) -> None:
     issues = schema_issues + _semantic_issues(instance)
     if issues:
         raise AuditCaseValidationError(issues)
+
+
+def validate_audit_snapshot(instance: object) -> None:
+    """Validate one bounded baseline or edited evidence snapshot."""
+
+    issues = _schema_issues(
+        load_audit_snapshot_schema(),
+        instance,
+        registry=_artifact_schema_registry(),
+    )
+    issues.extend(_audit_snapshot_semantic_issues(instance))
+    if issues:
+        raise AuditSnapshotValidationError(issues)
 
 
 def validate_run_manifest(instance: object) -> None:
@@ -283,6 +314,37 @@ def _semantic_issues(instance: object) -> list[ValidationIssue]:
     issues = _prompt_template_issues(instance)
     issues.extend(_probe_id_issues(instance))
     issues.extend(_target_issues(instance))
+    return issues
+
+
+def _audit_snapshot_semantic_issues(instance: object) -> list[ValidationIssue]:
+    if not isinstance(instance, Mapping):
+        return []
+    issues = _non_finite_number_issues(instance)
+    measurements = instance.get("measurements")
+    if not isinstance(measurements, Mapping):
+        return issues
+
+    first_path_by_id: dict[str, str] = {}
+    for field_name in ("target_scores", "control_logits"):
+        entries = measurements.get(field_name)
+        if not _is_array(entries):
+            continue
+        for index, entry in enumerate(entries):
+            if not isinstance(entry, Mapping):
+                continue
+            probe_id = entry.get("probe_id")
+            if not isinstance(probe_id, str):
+                continue
+            path = f"$.measurements.{field_name}[{index}].probe_id"
+            first_path = first_path_by_id.setdefault(probe_id, path)
+            if first_path != path:
+                issues.append(
+                    ValidationIssue(
+                        path,
+                        f"duplicate probe_id {probe_id!r}; first declared at {first_path}",
+                    )
+                )
     return issues
 
 

@@ -10,8 +10,10 @@ from numbers import Integral
 from typing import Literal, SupportsFloat, cast
 
 MetricId = Literal[
+    "efficacy.mean_target_log_probability_delta",
     "generality.mean_target_log_probability_delta",
     "locality.mean_absolute_target_log_probability_delta",
+    "portability.mean_expected_target_log_probability_delta",
 ]
 MetricDirection = Literal["higher-is-better", "lower-is-better"]
 
@@ -198,6 +200,19 @@ def reduce_generality_log_probability_deltas(
     )
 
 
+def reduce_efficacy_log_probability_deltas(
+    probes: Sequence[PairedProbeScore],
+) -> ProbeScoreReduction:
+    """Average edited-minus-baseline target scores over exact edit probes."""
+
+    return _reduce_probe_scores(
+        probes,
+        metric_id="efficacy.mean_target_log_probability_delta",
+        direction="higher-is-better",
+        absolute_contribution=False,
+    )
+
+
 def reduce_locality_log_probability_drift(
     probes: Sequence[PairedProbeScore],
 ) -> ProbeScoreReduction:
@@ -208,6 +223,19 @@ def reduce_locality_log_probability_drift(
         metric_id="locality.mean_absolute_target_log_probability_delta",
         direction="lower-is-better",
         absolute_contribution=True,
+    )
+
+
+def reduce_portability_log_probability_deltas(
+    probes: Sequence[PairedProbeScore],
+) -> ProbeScoreReduction:
+    """Average edited-minus-baseline expected-target scores over portability probes."""
+
+    return _reduce_probe_scores(
+        probes,
+        metric_id="portability.mean_expected_target_log_probability_delta",
+        direction="higher-is-better",
+        absolute_contribution=False,
     )
 
 

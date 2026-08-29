@@ -67,14 +67,14 @@ def test_governance_docs_cover_required_threats_and_license_decisions() -> None:
         assert required_source in inventory
 
 
-def test_milestone_zero_through_four_acceptance_is_documented() -> None:
+def test_milestone_zero_through_five_acceptance_is_documented() -> None:
     acceptance = (PROJECT_ROOT / "docs" / "MILESTONE_ACCEPTANCE.md").read_text(
         encoding="utf-8"
     )
     roadmap = (PROJECT_ROOT / "docs" / "ROADMAP.md").read_text(encoding="utf-8")
 
-    for milestone in range(5):
+    for milestone in range(6):
         assert f"## Milestone {milestone} —" in acceptance
-    for issue in range(13, 21):
+    for issue in range(13, 26):
         assert f"- [x] {issue}." in roadmap
-    assert "Milestones 5 and 6 remain intentionally open" in acceptance
+    assert "Milestone 6 remains intentionally open" in acceptance

@@ -1,4 +1,4 @@
-# Milestone 0–4 acceptance audit
+# Milestone 0–5 acceptance audit
 
 Audit date: 2026-08-29
 
@@ -12,10 +12,11 @@ scoped to the exact repository revision on which the listed commands pass.
 | Milestone | Status | Scope boundary |
 |---|---|---|
 | 0 — Research and governance | Accepted | Name availability is a dated search, not a reservation; third-party dataset terms remain operator responsibilities |
-| 1 — Contracts and offline metrics | Accepted | Reducers operate on caller-supplied values; there is no end-to-end runner yet |
+| 1 — Contracts and offline metrics | Accepted | Reducers operate on caller-supplied values; model execution remains adapter-owned |
 | 2 — Tiny adapter and causal tracing | Accepted | Exact pinned CPU/float32 `GPT2LMHeadModel` only; synthetic random-weight integration fixture |
 | 3 — External editor adapters | Accepted | Data-only normalized ROME/EasyEdit manifests; no upstream code, checkpoint, or tensor value is executed or redistributed |
-| 4 — Ripple and structural audit | Accepted | Ripple is an input contract; behavioral evaluation orchestration remains Milestone 5 |
+| 4 — Ripple and structural audit | Accepted | Ripple is an input contract; the Milestone 5 CLI consumes already-computed evidence |
+| 5 — CLI and reports | Accepted | Data-only snapshots only; no checkpoint loading, external editor execution, or safety conclusion |
 
 ## Milestone 0 — Research and governance
 
@@ -153,6 +154,49 @@ Acceptance evidence:
   and changed-weight redistribution decisions are recorded in
   [`SOURCES_AND_LICENSES.md`](SOURCES_AND_LICENSES.md).
 
+## Milestone 5 — CLI and reports
+
+Deliverable evidence:
+
+- dependency-light `validate-case`, `audit`, and `compare` commands:
+  `src/kedit_audit/cli.py` and [`CLI.md`](CLI.md);
+- versioned data-only baseline/edited input contract and fictional fixtures:
+  `audit_snapshot.schema.json`, `test_audit_snapshot.py`, and
+  [`AUDIT_SNAPSHOT.md`](AUDIT_SNAPSHOT.md);
+- manifest-first execution with terminal-report finalization:
+  `audit/runner.py`, `audit/pipeline.py`, and `test_audit_runner.py`;
+- efficacy, generality, locality, portability, and control-KL assembly with raw
+  probe evidence: `metrics/behavioral.py`, `metrics/distributional.py`, and
+  `test_audit_pipeline.py`;
+- validated canonical JSON, escaped deterministic Markdown, and strict report
+  comparison: `reporting/writer.py`, `reporting/comparison.py`,
+  `test_report_writer.py`, and `test_report_comparison.py`.
+
+Acceptance evidence:
+
+- `test_cli_help_works_when_ml_imports_are_blocked` proves CLI help imports no
+  Torch, Transformers, or NumPy.
+- the audit pipeline persists `running`, computes metrics, validates the full
+  report, writes authoritative JSON and escaped Markdown, then persists the
+  same completed manifest; nested and standalone manifests are asserted equal.
+- malformed/incompatible preflight input creates no misleading manifest;
+  metric and report-finalization exceptions replace an existing running
+  manifest with a validated failed manifest that excludes exception text.
+- snapshot/case probe IDs require exact coverage, comparison context is equal,
+  baseline/edited logical IDs differ, and comparable artifact hashes cannot be
+  equal.
+- input/output path aliasing is rejected before any write; bounded JSON,
+  duplicate-key rejection, finite numbers, symbolic-link refusal, atomic
+  replacement, HTML/Markdown escaping, and private-value non-echo are covered
+  by unit tests.
+- reports retain numeric per-probe evidence but omit AuditCase prompts,
+  subjects, and targets. Fixed limitations state that snapshots are
+  caller-supplied and that results are not safety certification.
+
+The accepted end-to-end claim begins at validated evidence snapshots. A future
+live-adapter workflow must produce those measurements without weakening model
+state isolation, resource limits, or provenance requirements.
+
 ## Reproduction gate
 
 From the repository root, the acceptance gate is:
@@ -167,10 +211,10 @@ From the repository root, the acceptance gate is:
 
 Observed on 2026-08-29:
 
-- default offline gate: 152 passed, 2 integration tests deselected;
+- default offline gate: 193 passed, 2 integration tests deselected;
 - local GPT-2 integration gate: 2 passed;
 - Ruff: all checks passed;
-- strict mypy: no issues in 20 source files;
+- strict mypy: no issues in 30 source files;
 - `pip check`: no broken requirements;
 - online `pip-audit --skip-editable`: no known vulnerabilities in the installed
   third-party environment (the editable KEditAudit distribution is skipped).
@@ -181,6 +225,6 @@ initial dangerous-API text match was the typed/model call to `.eval()` in the
 Transformers adapter, not Python's `eval` builtin. Automated scans reduce risk;
 they do not prove the absence of every secret or vulnerability.
 
-Milestones 5 and 6 remain intentionally open: CLI/runner/report rendering,
-public-beta packaging, contributor workflow, CI, tutorial, and external
-reproduction are not claimed by this acceptance record.
+Milestone 6 remains intentionally open: public-beta packaging, contributor
+workflow, CI, tutorial, release tagging, and external reproduction are not
+claimed by this acceptance record.

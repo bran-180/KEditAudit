@@ -7,8 +7,10 @@ import pytest
 from kedit_audit.metrics import (
     PairedProbeScore,
     ProbeReductionValidationError,
+    reduce_efficacy_log_probability_deltas,
     reduce_generality_log_probability_deltas,
     reduce_locality_log_probability_drift,
+    reduce_portability_log_probability_deltas,
 )
 
 
@@ -52,6 +54,20 @@ def test_locality_reduces_absolute_drift_but_retains_signed_deltas() -> None:
     assert result.probes[0].contribution == pytest.approx(0.1)
     assert result.probes[1].signed_delta == pytest.approx(0.4)
     assert result.probes[1].contribution == pytest.approx(0.4)
+
+
+def test_exact_and_portability_reducers_use_explicit_metric_ids() -> None:
+    probe = [PairedProbeScore("probe-1", -2.0, -1.25)]
+
+    efficacy = reduce_efficacy_log_probability_deltas(probe)
+    portability = reduce_portability_log_probability_deltas(probe)
+
+    assert efficacy.metric_id == "efficacy.mean_target_log_probability_delta"
+    assert efficacy.aggregate == 0.75
+    assert portability.metric_id == (
+        "portability.mean_expected_target_log_probability_delta"
+    )
+    assert portability.aggregate == 0.75
 
 
 def test_partial_coverage_is_explicit_and_survives_json_round_trip() -> None:

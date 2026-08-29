@@ -5,8 +5,8 @@
 KEditAudit is being built to compare baseline and edited model states through
 reproducible audit artifacts. The implemented core currently provides
 versioned contracts, deterministic evidence reducers, narrow model/editor
-adapters, and causal-tracing primitives; the end-to-end CLI and report writer
-remain Milestone 5 work.
+adapters, causal-tracing primitives, and a data-only end-to-end audit CLI with
+validated JSON and escaped Markdown reports.
 
 This repository is currently a reviewed project blueprint and early Python
 package. It does **not** yet implement ROME, MEMIT, broad model-family support,
@@ -70,6 +70,7 @@ See:
 - [Knowledge base](docs/KNOWLEDGE_BASE.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [AuditCase contract](docs/AUDIT_CASE.md)
+- [AuditSnapshot contract](docs/AUDIT_SNAPSHOT.md)
 - [RunManifest and artifact hashing](docs/RUN_MANIFEST.md)
 - [MetricResult and AuditReport contracts](docs/AUDIT_REPORT.md)
 - [ModelAdapter contract and offline fake](docs/MODEL_ADAPTER.md)
@@ -83,7 +84,7 @@ See:
 - [Name, license, and citation decision](docs/NAME_AND_CITATION.md)
 - [Threat model](docs/THREAT_MODEL.md)
 - [Sources and license inventory](docs/SOURCES_AND_LICENSES.md)
-- [Milestone 0–4 acceptance audit](docs/MILESTONE_ACCEPTANCE.md)
+- [Milestone 0–5 acceptance audit](docs/MILESTONE_ACCEPTANCE.md)
 - [Command-line interface](docs/CLI.md)
 - [Audit runner state contract](docs/AUDIT_RUNNER.md)
 - [JSON and Markdown reporting](docs/REPORTING.md)
@@ -102,9 +103,12 @@ available, together with safe module resolution, hook lifecycle management,
 an offline clean/corrupt/restore coordinator, and a pinned GPT-2 activation
 adapter. The GPT-2 integration adds deterministic subject-embedding noise,
 restores clean subject states at verified transformer blocks, and emits ordered
-JSON-ready heatmap evidence. End-to-end audit orchestration and audit CLI wiring
-remain planned work; validated JSON and escaped deterministic Markdown writers
-are implemented. A versioned data-only editor
+JSON-ready heatmap evidence. The implemented audit CLI consumes paired
+versioned data-only snapshots, verifies comparison context and complete
+AuditCase probe coverage, computes efficacy/generality/locality/portability and
+control-KL metrics, and writes a manifest plus validated JSON and escaped
+deterministic Markdown. It does not load checkpoints or invoke external editor
+code. A versioned data-only editor
 manifest and fail-closed normalized ROME and EasyEdit fixture importers are
 implemented; no upstream editor code or checkpoint is executed.
 Coverage-aware structural weight differences are also implemented for supplied
@@ -116,6 +120,20 @@ not treated as proof of semantic harm or safety.
 python -m pip install -e ".[dev]"
 python -m pytest
 ```
+
+Run the fully local synthetic audit example:
+
+```powershell
+python -m kedit_audit audit `
+  --baseline tests\fixtures\audit_snapshots\valid\baseline.json `
+  --edited tests\fixtures\audit_snapshots\valid\edited.json `
+  --case tests\fixtures\audit_cases\valid\basic.json `
+  --out reports\synthetic-audit
+```
+
+This example consumes fictional numeric evidence and creates
+`run-manifest.json`, `audit-report.json`, and `audit-report.md`. It downloads no
+model and is contract evidence, not a model-safety result.
 
 The optional local GPT-2 integration uses exact ML versions and no downloaded
 checkpoint:

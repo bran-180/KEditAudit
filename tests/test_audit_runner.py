@@ -143,3 +143,51 @@ def test_naive_clock_failure_still_preserves_a_failure_manifest(tmp_path: Path) 
     assert isinstance(raised.value.__cause__, AuditRunnerValidationError)
     persisted = json.loads((tmp_path / MANIFEST_FILENAME).read_text(encoding="utf-8"))
     assert persisted["status"] == "failed"
+
+
+def test_finalizer_receives_completed_manifest_before_terminal_persistence(
+    tmp_path: Path,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def finalize(value: str, completed: object) -> None:
+        observed["value"] = value
+        observed["completed"] = completed
+        persisted = json.loads((tmp_path / MANIFEST_FILENAME).read_text(encoding="utf-8"))
+        observed["persisted_status_during_finalize"] = persisted["status"]
+
+    result = execute_audit(
+        initial_manifest=_running_manifest(),
+        output_directory=tmp_path,
+        operation=lambda: "metric-evidence",
+        finalize=finalize,
+        clock=_fixed_clock,
+    )
+
+    assert observed["value"] == "metric-evidence"
+    assert cast(dict[str, object], observed["completed"])["status"] == "completed"
+    assert observed["persisted_status_during_finalize"] == "running"
+    assert result.manifest["status"] == "completed"
+
+
+def test_finalizer_failure_is_persisted_as_failed_run(tmp_path: Path) -> None:
+    private_text = "private report content"
+
+    def finalize(_value: str, _completed: object) -> None:
+        raise RuntimeError(private_text)
+
+    with pytest.raises(AuditExecutionError):
+        execute_audit(
+            initial_manifest=_running_manifest(),
+            output_directory=tmp_path,
+            operation=lambda: "metric-evidence",
+            finalize=finalize,
+            failure_stage="reporting",
+            clock=_fixed_clock,
+        )
+
+    manifest_text = (tmp_path / MANIFEST_FILENAME).read_text(encoding="utf-8")
+    manifest = json.loads(manifest_text)
+    assert manifest["status"] == "failed"
+    assert manifest["failure"]["stage"] == "reporting"
+    assert private_text not in manifest_text

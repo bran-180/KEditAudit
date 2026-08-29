@@ -54,6 +54,7 @@ def execute_audit(
     initial_manifest: Mapping[str, object],
     output_directory: str | Path,
     operation: Callable[[], T],
+    finalize: Callable[[T, Mapping[str, object]], None] | None = None,
     failure_stage: str = "evaluation",
     clock: Callable[[], datetime] | None = None,
 ) -> AuditExecutionResult[T]:
@@ -84,6 +85,8 @@ def execute_audit(
             ended_at=_read_utc_clock(read_clock),
             failure=None,
         )
+        if finalize is not None:
+            finalize(value, completed)
         manifest_path = write_run_manifest(
             completed,
             output_directory=output_directory,

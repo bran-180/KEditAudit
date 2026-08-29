@@ -7,8 +7,10 @@ from kedit_audit.metrics.behavioral import (
     ProbeScoreEvidence,
     ProbeScoreReduction,
     SequenceLogProbability,
+    reduce_efficacy_log_probability_deltas,
     reduce_generality_log_probability_deltas,
     reduce_locality_log_probability_drift,
+    reduce_portability_log_probability_deltas,
     target_sequence_log_probability,
 )
 from kedit_audit.metrics.distributional import (
@@ -43,7 +45,9 @@ __all__ = [
     "WeightTensorPair",
     "analyze_weight_differences",
     "reduce_control_kl_divergence",
+    "reduce_efficacy_log_probability_deltas",
     "reduce_generality_log_probability_deltas",
     "reduce_locality_log_probability_drift",
+    "reduce_portability_log_probability_deltas",
     "target_sequence_log_probability",
 ]

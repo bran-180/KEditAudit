@@ -30,6 +30,7 @@ kedit-audit/
 │   │   └── easyedit.py
 │   ├── artifacts/
 │   │   ├── audit_case.schema.json
+│   │   ├── audit_snapshot.schema.json
 │   │   ├── hashing.py
 │   │   ├── run_manifest.schema.json
 │   │   ├── schema.py
@@ -191,7 +192,18 @@ checks nested semantic constraints, rejects duplicate metric IDs, and verifies
 that report status and audit-case references agree with the manifest. The
 report stores case metadata rather than duplicating prompts. Validated
 canonical-JSON writing and escaped deterministic Markdown rendering are
-implemented. End-to-end report assembly remains Issue 25 work.
+implemented. The Milestone 5 data-only pipeline assembles complete reports from
+paired validated AuditSnapshots.
+
+### `AuditSnapshot`
+
+`AuditSnapshot` is the dependency-light CLI boundary for caller-supplied
+baseline or edited measurements. It records model, tokenizer, artifact,
+environment, editor, generation, seed, and KEditAudit provenance together with
+target scores and aligned control logits. Pair validation requires distinct
+logical states, identical comparison context, and exact AuditCase probe
+coverage. No checkpoint or external code is deserialized. See
+[`AUDIT_SNAPSHOT.md`](AUDIT_SNAPSHOT.md).
 
 ## 3. Execution pipeline
 
@@ -211,12 +223,20 @@ validate case
 
 If any mandatory probe fails, the report must show an incomplete state rather than silently dropping the probe.
 
+The diagram is the live-adapter target pipeline. The implemented Milestone 5
+CLI begins after evaluation: it validates paired data-only snapshots containing
+the already-computed scores/logits, requires complete case coverage, and then
+runs the metric, manifest, and report stages. Live checkpoint loading and
+automatic incomplete-evidence reporting are not claimed by this command.
+
 The implemented manifest-first runner accepts an already validated `running`
 manifest and a caller-owned evaluation callback. It atomically persists the
-running state, then a completed or failed terminal state. Failure manifests
-exclude the exception message and traceback while the raised error retains the
-local exception chain. It does not load models or claim end-to-end CLI support;
-see [`AUDIT_RUNNER.md`](AUDIT_RUNNER.md).
+running state, computes a proposed completed manifest for optional report
+finalization, then persists a completed or failed terminal state. Failure
+manifests exclude the exception message and traceback while the raised error
+retains the local exception chain. The data-only CLI connects this runner to
+snapshot reduction and report writing without loading a model; see
+[`AUDIT_RUNNER.md`](AUDIT_RUNNER.md).
 
 The report comparator validates both complete source contracts, requires the
 same case, baseline, model/tokenizer, numeric environment, generation, and seed

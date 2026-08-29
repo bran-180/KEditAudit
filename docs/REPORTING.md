@@ -26,3 +26,11 @@ Writes use same-directory temporary files and atomic replacement. Existing
 symbolic-link output targets are rejected. This protects normal local artifact
 production but is not a sandbox against a hostile account concurrently
 modifying the same filesystem directory.
+
+The Milestone 5 data-only pipeline invokes the writer through the audit
+runner's finalization callback. The report therefore embeds the exact proposed
+completed manifest; only after JSON and Markdown return successfully is that
+terminal manifest persisted as the standalone `run-manifest.json`. A later
+standalone-manifest write failure cannot roll back an already replaced report,
+so consumers must require agreement between the nested and standalone
+manifests rather than inferring completion from file presence alone.

@@ -9,11 +9,11 @@ availability must be checked again immediately before public publication.
 
 ## Project summary — English
 
-KEditAudit is an open-source, editor-agnostic audit toolkit under active development for measuring the intended and unintended effects of knowledge edits in autoregressive language models. Its implemented contracts and metric engine compare supplied baseline and edited evidence across target efficacy, paraphrase generality, neighborhood locality, control-distribution drift, and structural weight changes; the end-to-end runner that will emit a versioned JSON report is planned for Milestone 5. Rather than duplicating existing editing frameworks, KEditAudit is building a reproducible evidence layer around normalized outputs from tools such as the official ROME implementation and EasyEdit.
+KEditAudit is an open-source, editor-agnostic audit toolkit under active development for measuring the intended and unintended effects of knowledge edits in autoregressive language models. Its implemented contracts and metric engine compare supplied baseline and edited evidence across target efficacy, paraphrase generality, neighborhood locality, portability, control-distribution drift, and structural weight changes. Its Milestone 5 data-only CLI now validates paired evidence snapshots and emits a versioned manifest plus JSON and Markdown reports without loading a checkpoint or invoking an editor. Rather than duplicating existing editing frameworks, KEditAudit is building a reproducible evidence layer around normalized outputs from tools such as the official ROME implementation and EasyEdit.
 
 ## 專案摘要 — 繁體中文
 
-KEditAudit 是一套正在開發中的開源、與編輯演算法解耦的知識編輯審計工具。現有版本已能以版本化契約與確定性指標引擎，分析外部提供的 baseline 與 edited 證據，包括目標效能、釋義泛化、鄰域保真、控制分布漂移與權重結構變化；會輸出完整版本化 JSON 報告的端到端 runner 則規劃於 Milestone 5。KEditAudit 不重複打造另一套編輯算法集合，而是逐步建立可接收官方 ROME、EasyEdit 等工具正規化輸出的可重現證據層。
+KEditAudit 是一套正在開發中的開源、與編輯演算法解耦的知識編輯審計工具。現有版本已能以版本化契約與確定性指標引擎，分析外部提供的 baseline 與 edited 證據，包括目標效能、釋義泛化、鄰域保真、可攜性、控制分布漂移與權重結構變化。Milestone 5 的資料型 CLI 現已能驗證成對 evidence snapshots，並在不載入 checkpoint、也不執行 editor 的前提下輸出版本化 manifest、JSON 與 Markdown 報告。KEditAudit 不重複打造另一套編輯算法集合，而是逐步建立可接收官方 ROME、EasyEdit 等工具正規化輸出的可重現證據層。
 
 ## Community impact — English
 

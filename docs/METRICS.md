@@ -78,7 +78,7 @@ This score describes the model probability assigned to a specified token
 sequence. A baseline-to-edited increase is evidence about that target only; it
 is not proof of factual correctness, generalization, locality, or model safety.
 
-## Generality and locality reductions
+## Efficacy, generality, locality, and portability reductions
 
 Status: implemented for paired mean target log-probabilities.
 
@@ -100,6 +100,15 @@ Each `PairedProbeScore` contains:
 
 Scores must be finite and non-positive. Probe IDs must be unique. Input order is
 preserved in the result so every aggregate remains linked to its source probe.
+
+### Efficacy: mean target log-probability delta
+
+For exact edit probes, KEditAudit averages the signed
+`edited - baseline` target-score change. The metric ID is
+`efficacy.mean_target_log_probability_delta`; higher values mean only that the
+edited snapshot assigned more probability to the specified target on the
+evaluated exact prompts. This continuous project metric is not CounterFact
+rewrite accuracy and does not establish factual correctness.
 
 ### Generality: mean target log-probability delta
 
@@ -136,6 +145,18 @@ distribution drift, top-k agreement, generation changes, or every possible
 side effect. In particular, it is not the KL control-divergence metric planned
 below.
 
+### Portability: mean expected-target log-probability delta
+
+For portability probes, KEditAudit applies the same signed
+`edited - baseline` reduction to each probe's declared expected target. The
+metric ID is
+`portability.mean_expected_target_log_probability_delta`. Its terminology is
+grounded in the [EasyEdit system paper](https://aclanthology.org/2024.acl-demos.9/)
+and [RippleEdits](https://aclanthology.org/2024.tacl-1.16/), while the exact
+continuous reduction is a transparent KEditAudit definition. A positive value
+on a finite probe set does not prove general reasoning or universal ripple
+consistency.
+
 ### Coverage and result contract
 
 The reduction name is `arithmetic_mean_over_available_probes`. Missing pairs
@@ -150,9 +171,9 @@ aggregate, total/evaluated/missing counts, coverage, warnings, and all raw
 `ProbeScoreEvidence`. A later AuditReport may mark mandatory missing probes as
 an incomplete run; this reducer does not silently make that policy decision.
 
-Neither reduction emits a PASS/FAIL threshold. Generality on a finite probe set
-does not establish universal generalization, and low measured locality drift is
-not a safety guarantee.
+None of these reductions emits a PASS/FAIL threshold. Efficacy, generality,
+and portability on finite probe sets do not establish universal correctness or
+generalization, and low measured locality drift is not a safety guarantee.
 
 ## Control-distribution KL divergence
 

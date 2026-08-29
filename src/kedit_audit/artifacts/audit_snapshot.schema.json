@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kedit-audit:schema:audit-snapshot:1.0.0",
+  "title": "KEditAudit AuditSnapshot",
+  "description": "A bounded data-only snapshot of one baseline or edited model state for offline audit assembly.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "state",
+    "kedit_audit",
+    "environment",
+    "model",
+    "editor",
+    "generation",
+    "seeds",
+    "measurements"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "snapshot_id": {
+      "$ref": "urn:kedit-audit:schema:run-manifest:1.0.0#/$defs/identifier"
+    },
+    "state": { "enum": ["baseline", "edited"] },
+    "kedit_audit": {
+      "$ref": "urn:kedit-audit:schema:run-manifest:1.0.0#/$defs/keditAudit"
+    },
+    "environment": {
+      "$ref": "urn:kedit-audit:schema:run-manifest:1.0.0#/$defs/environment"
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_id",
+        "model_revision",
+        "tokenizer_id",
+        "tokenizer_revision",
+        "artifact"
+      ],
+      "properties": {
+        "model_id": { "$ref": "#/$defs/nonEmptyText" },
+        "model_revision": { "$ref": "#/$defs/revision" },
+        "tokenizer_id": { "$ref": "#/$defs/nonEmptyText" },
+        "tokenizer_revision": { "$ref": "#/$defs/revision" },
+        "artifact": {
+          "$ref": "urn:kedit-audit:schema:run-manifest:1.0.0#/$defs/artifactReference"
+        }
+      }
+    },
+    "editor": {
+      "$ref": "urn:kedit-audit:schema:run-manifest:1.0.0#/$defs/editor"
+    },
+    "generation": {
+      "type": "object",
+      "maxProperties": 256,
+      "additionalProperties": { "$ref": "#/$defs/jsonValue" }
+    },
+    "seeds": {
+      "$ref": "urn:kedit-audit:schema:run-manifest:1.0.0#/$defs/seeds"
+    },
+    "measurements": { "$ref": "#/$defs/measurements" }
+  },
+  "$defs": {
+    "nonEmptyText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32768
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "jsonValue": {
+      "oneOf": [
+        { "type": ["null", "boolean", "number", "string"] },
+        { "type": "array", "items": { "$ref": "#/$defs/jsonValue" } },
+        {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/jsonValue" }
+        }
+      ]
+    },
+    "targetScore": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["probe_id", "mean_target_log_probability"],
+      "properties": {
+        "probe_id": {
+          "$ref": "urn:kedit-audit:schema:run-manifest:1.0.0#/$defs/identifier"
+        },
+        "mean_target_log_probability": {
+          "type": "number",
+          "maximum": 0
+        }
+      }
+    },
+    "controlLogits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["probe_id", "logits"],
+      "properties": {
+        "probe_id": {
+          "$ref": "urn:kedit-audit:schema:run-manifest:1.0.0#/$defs/identifier"
+        },
+        "logits": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 65536,
+            "items": { "type": "number" }
+          }
+        }
+      }
+    },
+    "measurements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_scores", "control_logits", "control_temperature"],
+      "properties": {
+        "target_scores": {
+          "type": "array",
+          "maxItems": 40000,
+          "items": { "$ref": "#/$defs/targetScore" }
+        },
+        "control_logits": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": { "$ref": "#/$defs/controlLogits" }
+        },
+        "control_temperature": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    }
+  }
+}

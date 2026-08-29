@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "snapshot_id": "synthetic-edited-snapshot",
+  "state": "edited",
+  "kedit_audit": {
+    "version": "0.0.0",
+    "commit": "0123456789abcdef0123456789abcdef01234567",
+    "dirty": false
+  },
+  "environment": {
+    "python_version": "3.12.0",
+    "package_versions": {
+      "kedit-audit": "0.0.0"
+    },
+    "device": "cpu",
+    "dtype": "float32",
+    "quantization": {
+      "method": "none",
+      "configuration": {}
+    }
+  },
+  "model": {
+    "model_id": "synthetic/tiny-causal-lm",
+    "model_revision": "1111111111111111111111111111111111111111",
+    "tokenizer_id": "synthetic/tiny-tokenizer",
+    "tokenizer_revision": "2222222222222222222222222222222222222222",
+    "artifact": {
+      "artifact_id": "synthetic-edited-delta",
+      "kind": "model-delta",
+      "revision": "3333333333333333333333333333333333333333",
+      "content_hash": {
+        "algorithm": "sha256",
+        "encoding": "raw-bytes",
+        "digest": "1111111111111111111111111111111111111111111111111111111111111111",
+        "size_bytes": 128
+      }
+    }
+  },
+  "editor": {
+    "adapter": "synthetic-fixture",
+    "revision": "4444444444444444444444444444444444444444",
+    "hyperparameters": {
+      "rank": 1
+    }
+  },
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 1
+  },
+  "seeds": {
+    "python": 17
+  },
+  "measurements": {
+    "target_scores": [
+      {
+        "probe_id": "exact-1",
+        "mean_target_log_probability": -1.0
+      },
+      {
+        "probe_id": "paraphrase-1",
+        "mean_target_log_probability": -1.25
+      },
+      {
+        "probe_id": "locality-1",
+        "mean_target_log_probability": -1.1
+      },
+      {
+        "probe_id": "portability-1",
+        "mean_target_log_probability": -1.5
+      }
+    ],
+    "control_logits": [
+      {
+        "probe_id": "control-1",
+        "logits": [
+          [0.2, -0.2],
+          [0.4, -0.4]
+        ]
+      }
+    ],
+    "control_temperature": 1.0
+  }
+}

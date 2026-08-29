@@ -142,7 +142,7 @@ Acceptance:
 - [x] 22. Implement the audit runner state machine and persistent failure manifest.
 - [x] 23. Write validated JSON reports and escaped deterministic Markdown.
 - [x] 24. Compare two compatible validated reports without automatic conclusions.
-- [ ] 25. Complete Milestone 5 end-to-end, security, and acceptance validation.
+- [x] 25. Complete Milestone 5 end-to-end, security, and acceptance validation.
 
 ## Prompt template for each Codex session
 

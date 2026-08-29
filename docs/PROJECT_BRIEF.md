@@ -35,11 +35,11 @@ KEditAudit is an **audit layer**, not an editor catalogue. Editing is performed 
 - optional causal tracing and weight-diff analysis;
 - reproducible reports.
 
-## Planned MVP use case
+## Implemented Milestone 5 use case
 
-When Milestone 5 is complete, a tiny supported autoregressive model, a baseline
-state, an edited state, and a small versioned audit case will be sufficient for
-one command to produce a JSON and Markdown report containing:
+One command now accepts a small versioned audit case plus distinct baseline and
+edited `AuditSnapshot` files containing caller-supplied scores, control logits,
+and provenance. It produces validated JSON and escaped Markdown containing:
 
 - target-sequence log-probability before and after the edit;
 - exact-prompt efficacy;
@@ -48,6 +48,11 @@ one command to produce a JSON and Markdown report containing:
 - simple portability probes;
 - KL divergence on control prompts;
 - model, tokenizer, device, dtype, seed, dataset, and code provenance.
+
+The implemented command starts at the evidence boundary: it does not load a
+tiny model or checkpoint, run an editor, or generate snapshot measurements.
+Connecting live supported adapters to snapshot production remains separate
+work and must retain the same state-isolation and provenance guarantees.
 
 ## Differentiation
 

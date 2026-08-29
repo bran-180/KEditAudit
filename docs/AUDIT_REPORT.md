@@ -81,3 +81,9 @@ Its KEditAudit canonical JSON v1 representation is 4,354 bytes with SHA-256
 
 Compatible reports can be compared with the versioned, descriptive-only
 contract documented in [`REPORT_COMPARISON.md`](REPORT_COMPARISON.md).
+
+The Milestone 5 [`audit` command](CLI.md#data-only-audit-command) assembles this
+contract from paired validated [`AuditSnapshot`](AUDIT_SNAPSHOT.md) inputs. It
+requires complete AuditCase probe coverage, writes through the manifest-first
+runner, and excludes case prompts, subjects, and targets from both report
+formats.

@@ -11,6 +11,8 @@ or infer module paths.
 validate running manifest
     -> atomically persist run-manifest.json
     -> execute caller-owned operation
+    -> construct completed manifest
+    -> optionally finalize report with that terminal manifest
     -> completed manifest on success
     -> failed manifest on an Exception
 ```
@@ -27,8 +29,16 @@ exception remains chained to `AuditExecutionError` for local handling. The
 runner catches `Exception`, not `BaseException`, so process cancellation and
 keyboard interrupts are not converted into ordinary audit failures.
 
+The optional `finalize(value, completed_manifest)` callback runs while the
+standalone manifest still says `running`. This lets the report writer embed the
+exact completed manifest before the terminal manifest is persisted. A
+finalizer exception follows the same failed-manifest path as an evaluation
+exception. Cross-file writes are not a filesystem transaction: if a later
+write fails, an already written authoritative JSON report can remain beside a
+failed standalone manifest and must not be presented as a completed run.
+
 The caller owns baseline/edited separation, evaluation, and the initial
-manifest contents. A persisted completed state means that the callback
-returned; it does not certify metric completeness or model safety. Issue 23
-adds validated report writing, and Issue 25 will connect these primitives into
-the end-to-end CLI.
+manifest contents. The data-only Issue 25 pipeline supplies those pieces from
+validated AuditSnapshots. A persisted completed state means that computation,
+report validation, and requested report writes returned; it does not certify
+metric meaning, upstream model-state isolation, or model safety.
